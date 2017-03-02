@@ -17,7 +17,12 @@ var io = require('socket.io')(server);
  */
 function GameServer() {
     this.ships = [];
-		this.wind = [getRandomInt(1,9), getRandomInt(1,9)];
+		var wind_interval = 5000;
+
+		var that = this;
+		setInterval(function() {
+        that.updateWind();
+    }, wind_interval);
 }
 
 GameServer.prototype = {
@@ -52,7 +57,10 @@ GameServer.prototype = {
 						wind: this.wind
         };
         return t;
-    }
+    },
+		updateWind: function() {
+			this.wind = [getRandomInt(-9,9), getRandomInt(-9,9)];
+		}
 }
 
 var game = new GameServer();
