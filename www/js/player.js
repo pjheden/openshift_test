@@ -119,7 +119,7 @@ function Ship(id, canvas, x, y) {
     this.x = x;
     this.y = y;
     this.dead = false;
-    this.dir = [0, 0];
+    this.dir = 0;
     this.speed = 5;
     console.log('Ship created!');
 
@@ -144,41 +144,41 @@ Ship.prototype = {
 
     /**
      * Set the controls for the ship
-     * TODO add rotation
+     * TODO change to rotation
      */
     setControls: function() {
         var t = this;
         $(document).keypress(function(e) {
             var k = e.keyCode || e.which;
             switch (k) {
-                case 119: //W
-                    t.dir[1] = -1;
-                    break;
+                // case 119: //W
+                //     t.dir[1] = -1;
+                //     break;
                 case 100: //D
-                    t.dir[0] = 1;
+                    t.dir = 1;
                     break;
-                case 115: //S
-                    t.dir[1] = 1;
-                    break;
+                // case 115: //S
+                //     t.dir[1] = 1;
+                //     break;
                 case 97: //A
-                    t.dir[0] = -1;
+                    t.dir = -1;
                     break;
             }
 
         }).keyup(function(e) {
             var k = e.keyCode || e.which;
             switch (k) {
-                case 87: //W
-                    t.dir[1] = 0;
-                    break;
+                // case 87: //W
+                //     t.dir[1] = 0;
+                //     break;
                 case 68: //D
-                    t.dir[0] = 0;
+                    t.dir = 0;
                     break;
-                case 83: //S
-                    t.dir[1] = 0;
-                    break;
+                // case 83: //S
+                //     t.dir[1] = 0;
+                //     break;
                 case 65: //A
-                    t.dir[0] = 0;
+                    t.dir = 0;
                     break;
             }
         });
