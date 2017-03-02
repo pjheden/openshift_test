@@ -19,6 +19,7 @@ function GameServer() {
 		var that = this;
 
     that.ships = [];
+		that.wind = [0, 0];
 
 		var wind_interval = 5000;
 		setInterval(function() {
