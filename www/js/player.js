@@ -10,6 +10,8 @@ function Game(socket, canvasId, w, h) {
 
     this.ships = [];
     this.playerShip;
+
+    this.wind = [0, 0];
     var g = this;
 
     setInterval(function() {
@@ -53,7 +55,7 @@ Game.prototype = {
         console.log('mainLoop');
         this.drawShips();
         if (this.playerShip) {
-            this.playerShip.move();
+            this.playerShip.move(this.wind);
             this.sendData();
         }
     },
@@ -80,6 +82,7 @@ Game.prototype = {
      */
     recieveData: function(serverData) {
         var game = this;
+        game.wind = serverData.wind;
         console.log('recieveData', serverData);
 
         //TODO make a better update system
@@ -182,13 +185,13 @@ Ship.prototype = {
 
     },
 
-    move: function() {
+    move: function(wind) {
         if (this.dead) {
             return;
         }
 
-        var moveX = this.speed * this.dir[0];
-        var moveY = this.speed * this.dir[1];
+        var moveX = this.speed * this.dir[0] + wind[0];
+        var moveY = this.speed * this.dir[1] + wind[1];
         console.log(moveX, moveY);
         this.x += moveX;
         this.y += moveY;

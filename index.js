@@ -17,6 +17,7 @@ var io = require('socket.io')(server);
  */
 function GameServer() {
     this.ships = [];
+		this.wind = [getRandomInt(1,9), getRandomInt(1,9)];
 }
 
 GameServer.prototype = {
@@ -47,7 +48,8 @@ GameServer.prototype = {
     },
     getData: function() {
         var t = {
-            ships: this.ships
+            ships: this.ships,
+						wind: this.wind
         };
         return t;
     }
@@ -59,14 +61,13 @@ io.on('connection', function(client) {
     console.log('User connected');
 
     client.on('joinGame', function(player) {
-        console.log(player.id + ' joined the game');
-
 				//Check if id is unique, otherwise make it so
 				game.ships.forEach(function(ship){
 					if(ship.id === player.id){
 						player.id = player.id + getRandomInt(1,999);
 					}
 				});
+				console.log(player.id + ' joined the game');
 
         var initX = getRandomInt(300, 900);
         var initY = getRandomInt(200, 600);
