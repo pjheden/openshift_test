@@ -43,18 +43,18 @@ Game.prototype = {
         var that = this;
         this.ships.forEach(function(ship) {
             that.ctx.save();
-            that.ctx.translate(ship.x, ship.y);
-            // that.ctx.rotate(ship.getAngle());
-            that.ctx.drawImage(ship.image, ship.image.width / -2, ship.image.height / -2, ship.image.width / 10, ship.image.height / 10);
+            that.ctx.translate(ship.pos.x, ship.pos.y);
+            that.ctx.rotate(ship.angle);
+            that.ctx.drawImage(ship.image, ship.image.width / -2, ship.image.height / -2, ship.image.width, ship.image.height);
             that.ctx.restore();
         });
 
     },
 
     mainLoop: function() {
-        console.log('mainLoop');
         this.drawShips();
         if (this.playerShip) {
+            this.playerShip.rotate();
             this.playerShip.move(this.wind);
             this.sendData();
         }
@@ -63,12 +63,11 @@ Game.prototype = {
     sendData: function() {
         //Send local data to server
         var gameData = {};
-        console.log('sendData');
         //Send ship data
         var t = {
             id: this.playerShip.id,
-            x: this.playerShip.x,
-            y: this.playerShip.y
+            x: this.playerShip.pos.x,
+            y: this.playerShip.pos.y
         };
         gameData.ship = t;
 
@@ -83,20 +82,19 @@ Game.prototype = {
     recieveData: function(serverData) {
         var game = this;
         game.wind = serverData.wind;
-        console.log('recieveData', serverData);
 
         //TODO make a better update system
         //Update ship information
         serverData.ships.forEach(function(serverShip) {
-          var shipFound = false;
-          game.ships.forEach(function(clientShip){
-            if(serverShip.id === clientShip.id){
-              clientShip.x = serverShip.x;
-              clientShip.y = serverShip.y;
-              shipFound = true;
-            }
-          });
-          if(!shipFound) game.addShip(serverShip.id, serverShip.x, serverShip.y, false);
+            var shipFound = false;
+            game.ships.forEach(function(clientShip) {
+                if (serverShip.id === clientShip.id) {
+                    clientShip.x = serverShip.x;
+                    clientShip.y = serverShip.y;
+                    shipFound = true;
+                }
+            });
+            if (!shipFound) game.addShip(serverShip.id, serverShip.x, serverShip.y, false);
         });
 
 
@@ -110,17 +108,32 @@ Game.prototype = {
  * @param {integer} x - The x coordinate of the ship
  * @param {integer} y - The y coordinate of the ship
  */
-function Ship(id, canvas, x, y) {
+function Ship(id, canvas, xx, yy) {
     this.id = id;
     this.ctx = canvas[0].getContext('2d');
-    this.src = './images/ships/ship_pattern0.png';
+    var src = './images/ships/ship_pattern0.png';
     this.image = new Image();
-    this.image.src = this.src;
-    this.x = x;
-    this.y = y;
-    this.dead = false;
-    this.dir = 0;
+    this.image.src = src;
+    this.image.width = this.image.width / 10;
+    this.image.height = this.image.height / 10;
     this.speed = 5;
+
+    // this.pos.x = x;
+    // this.pos.y = y;
+    // this.dir = 0;
+
+    this.pos = {
+        x: xx,
+        y: yy
+    };
+    this.dir = {
+        x: 0,
+        y: 0
+    };
+    this.rotateDir = 0;
+    this.angle = 0.0;
+    this.deltaA = Math.PI / 100;
+
     console.log('Ship created!');
 
     this.materialize();
@@ -133,13 +146,11 @@ Ship.prototype = {
         this.draw(); //Draw once?
     },
     draw: function() {
-        console.log('draw ship!');
         this.ctx.save();
-        this.ctx.translate(this.x, this.y);
-        // this.ctx.rotate(player.getAngle());
-        this.ctx.drawImage(this.image, this.image.width / -2, this.image.height / -2, this.image.width / 10, this.image.height / 10);
+        this.ctx.translate(this.pos.x, this.pos.y);
+        this.ctx.rotate(this.angle);
+        this.ctx.drawImage(this.image, this.image.width / -2, this.image.height / -2, this.image.width, this.image.height);
         this.ctx.restore();
-
     },
 
     /**
@@ -152,16 +163,16 @@ Ship.prototype = {
             var k = e.keyCode || e.which;
             switch (k) {
                 // case 119: //W
-                //     t.dir[1] = -1;
+                //     t.dir.y = -1;
                 //     break;
                 case 100: //D
-                    t.dir = 1;
+                    t.rotateDir = 1;
                     break;
-                // case 115: //S
-                //     t.dir[1] = 1;
-                //     break;
+                    // case 115: //S
+                    //     t.dir.y = 1;
+                    //     break;
                 case 97: //A
-                    t.dir = -1;
+                    t.rotateDir = -1;
                     break;
             }
 
@@ -169,20 +180,31 @@ Ship.prototype = {
             var k = e.keyCode || e.which;
             switch (k) {
                 // case 87: //W
-                //     t.dir[1] = 0;
+                //     t.dir.x = 0;
                 //     break;
                 case 68: //D
-                    t.dir = 0;
+                    t.rotateDir = 0;
                     break;
-                // case 83: //S
-                //     t.dir[1] = 0;
-                //     break;
+                    // case 83: //S
+                    //     t.dir.x = 0;
+                    //     break;
                 case 65: //A
-                    t.dir = 0;
+                    t.rotateDir = 0;
                     break;
             }
         });
 
+    },
+
+    rotate: function() {
+        this.angle += this.rotateDir * this.deltaA;
+        if (this.angle > Math.PI * 2) {
+            this.angle -= this.rotateDir * Math.PI * 2;
+        }
+        //Rotate direction
+        this.dir.x = Math.cos(this.angle);
+        this.dir.y = Math.sin(this.angle);
+        this.dir = normalize(this.dir.x, this.dir.y);
     },
 
     move: function(wind) {
@@ -190,16 +212,18 @@ Ship.prototype = {
             return;
         }
 
-        var moveX = this.speed * this.dir[0] + wind[0];
-        var moveY = this.speed * this.dir[1] + wind[1];
-        console.log(moveX, moveY);
-        this.x += moveX;
-        this.y += moveY;
-        // if (this.x + moveX > (0 + ARENA_MARGIN) && (this.x + moveX) < (this.canvas.width() - ARENA_MARGIN)) {
-        //     this.x += moveX;
+        var moveX = this.speed * this.dir.x;
+        var moveY = this.speed * this.dir.y;
+
+        this.pos.x += moveX;
+        this.pos.y += moveY;
+
+        console.log('move', this);
+        // if (this.pos.x + moveX > (0 + ARENA_MARGIN) && (this.pos.x + moveX) < (this.canvas.width() - ARENA_MARGIN)) {
+        //     this.pos.x += moveX;
         // }
-        // if (this.y + moveY > (0 + ARENA_MARGIN) && (this.y + moveY) < (this.canvas.height() - ARENA_MARGIN)) {
-        //     this.y += moveY;
+        // if (this.pos.y + moveY > (0 + ARENA_MARGIN) && (this.pos.y + moveY) < (this.canvas.height() - ARENA_MARGIN)) {
+        //     this.pos.y += moveY;
         // }
     }
 }
