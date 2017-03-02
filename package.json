@@ -1,0 +1,21 @@
+{
+  "name": "mp_ship",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Per Julian Hedén",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.13.3",
+    "socket.io": "^1.3.7"
+  },
+  "devDependencies": {},
+  "description": "A multiplayer version of Last Ship Standing",
+  "keywords": [
+    "MP",
+    "real-time"
+  ]
+}

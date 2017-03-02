@@ -10,7 +10,7 @@ bower.json
 build.json
 config.xml
 *.jsproj
-package.json
+#package.json
 Project_Readme.html
 taco.json
 
