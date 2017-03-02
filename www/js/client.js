@@ -18,9 +18,9 @@ socket.on( 'error', function() {
 
 });
 
-var game = new Game(socket, '#arena');
+var game = new Game(socket, '#arena', 1400, 800);
 
-socket.on('sync', function(serverData){
+socket.on('serverSync', function(serverData){
   game.recieveData(serverData);
 });
 
@@ -28,8 +28,12 @@ socket.on('addShip', function(ship){
     game.addShip(ship.id, ship.x, ship.y, ship.isPlayer);
 });
 
-$(document).ready( function(){
+socket.on('removeShip', function(shipId){
+    game.removeShip(shipId);
+});
 
+var player_name;
+$(document).ready( function(){
   //Add onclick to join button
 	$('#join_button').click( function(){
 		player_name = $('#player_name').val();
@@ -40,7 +44,7 @@ $(document).ready( function(){
 });
 
 $(window).on('beforeunload', function(){
-	//socket.emit('leaveGame', tankName);
+	socket.emit('leaveGame', player_name);
 });
 
 //tells the server the name of the player

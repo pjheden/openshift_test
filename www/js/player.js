@@ -1,32 +1,60 @@
 var INTERVAL = 50;
 
-function Game(socket, canvasId) {
+function Game(socket, canvasId, w, h) {
     this.socket = socket;
-    this.$arena = $(canvasId);
+
+    this.canvas = $(canvasId);
+    this.canvas.width = w;
+    this.canvas.height = h;
+    this.ctx = this.canvas[0].getContext('2d');
+
+    this.ships = [];
+    this.playerShip;
     var g = this;
 
-    //TODO temoporarily removed interval
     setInterval(function() {
-    g.mainLoop();
+        g.mainLoop();
     }, INTERVAL);
 }
 
 Game.prototype = {
 
     addShip: function(id, x, y, isPlayer) {
-        var t = new Ship(id, this.$arena, x, y);
-        if (isPlayer){
-          this.playerShip = t;
-          t.setControls();
+        var t = new Ship(id, this.canvas, x, y);
+        this.ships.push(t);
+        if (isPlayer) {
+            this.playerShip = t;
+            t.setControls();
         }
+    },
+
+    removeShip: function(shipId) {
+        this.ships = this.ships.filter(function(t) {
+            return t.id != shipId
+        });
+    },
+    /**
+     * Draws all the ships on the map
+     */
+    drawShips: function() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        var that = this;
+        this.ships.forEach(function(ship) {
+            that.ctx.save();
+            that.ctx.translate(ship.x, ship.x);
+            // that.ctx.rotate(ship.getAngle());
+            that.ctx.drawImage(ship.image, ship.image.width / -2, ship.image.height / -2, ship.image.width / 10, ship.image.height / 10);
+            that.ctx.restore();
+        });
+
     },
 
     mainLoop: function() {
         console.log('mainLoop');
-        this.sendData();
-        if(this.playerShip){
-          this.playerShip.move();
-          this.playerShip.draw();
+        this.drawShips();
+        if (this.playerShip) {
+            this.playerShip.move();
+            this.sendData();
         }
     },
 
@@ -34,69 +62,48 @@ Game.prototype = {
         //Send local data to server
         var gameData = {};
         console.log('sendData');
-        // //Send tank data
-        // var t = {
-        //     id: this.localTank.id,
-        //     x: this.localTank.x,
-        //     y: this.localTank.y,
-        //     baseAngle: this.localTank.baseAngle,
-        //     cannonAngle: this.localTank.cannonAngle
-        // };
-        // gameData.tank = t;
+        //Send ship data
+        var t = {
+            id: this.playerShip.id,
+            x: this.playerShip.x,
+            y: this.playerShip.y
+        };
+        gameData.ship = t;
 
         //Client game does not send any info about projectiles,
         //the server controls that part
-        this.socket.emit('sync', gameData);
+        this.socket.emit('clientSync', gameData);
     },
 
-    receiveData: function(serverData) {
+    /**
+     * Recieves data from the server and update the local game accordingly
+     */
+    recieveData: function(serverData) {
         var game = this;
         console.log('recieveData', serverData);
-        // serverData.tanks.forEach(function(serverTank) {
-        //
-        //     // //Update local tank stats
-        //     // if (game.localTank !== undefined && serverTank.id == game.localTank.id) {
-        //     //     game.localTank.hp = serverTank.hp;
-        //     //     if (game.localTank.hp <= 0) {
-        //     //         game.killTank(game.localTank);
-        //     //     }
-        //     // }
-        //     //
-        //     // //Update foreign tanks
-        //     // var found = false;
-        //     // game.tanks.forEach(function(clientTank) {
-        //     //     //update foreign tanks
-        //     //     if (clientTank.id == serverTank.id) {
-        //     //         clientTank.x = serverTank.x;
-        //     //         clientTank.y = serverTank.y;
-        //     //         clientTank.baseAngle = serverTank.baseAngle;
-        //     //         clientTank.cannonAngle = serverTank.cannonAngle;
-        //     //         clientTank.hp = serverTank.hp;
-        //     //         if (clientTank.hp <= 0) {
-        //     //             game.killTank(clientTank);
-        //     //         }
-        //     //         clientTank.refresh();
-        //     //         found = true;
-        //     //     }
-        //     // });
-        //
-        //     // if (!found &&
-        //     //     (game.localTank == undefined || serverTank.id != game.localTank.id)) {
-        //     //     //I need to create it
-        //     //     game.addTank(serverTank.id, serverTank.type, false, serverTank.x, serverTank.y, serverTank.hp);
-        //     // }
-        //
-        // });
+
+        //TODO make a better update system
+        //Update ship information
+        serverData.ships.forEach(function(serverShip) {
+          var shipFound = false;
+          game.ships.forEach(function(clientShip){
+            if(serverShip.id === clientShip.id){
+              clientShip.x = serverShip.x;
+              clientShip.y = serverShip.y;
+              shipFound = true;
+            }
+          });
+          if(!shipFound) game.addShip(serverShip.id, serverShip.x, serverShip.y, false);
+        });
+
+
 
     }
 }
 
-function Ship(id, $arena, x, y) {
+function Ship(id, canvas, x, y) {
     this.id = id;
-    this.canvas = $arena;
-    this.canvas.width = 1400;
-    this.canvas.height = 800;
-    this.ctx = this.canvas[0].getContext('2d');
+    this.ctx = canvas[0].getContext('2d');
     this.src = './images/ships/ship_pattern0.png';
     this.image = new Image();
     this.image.src = this.src;
@@ -112,9 +119,9 @@ function Ship(id, $arena, x, y) {
 
 Ship.prototype = {
     materialize: function() {
-        // this.$arena.append('<div id="' + this.id + '" class="tank tank' + this.type + '"></div>');
+        // this.canvas.append('<div id="' + this.id + '" class="tank tank' + this.type + '"></div>');
 
-        this.draw();
+        this.draw(); //Draw once?
     },
     draw: function() {
         console.log('draw ship!');
@@ -174,10 +181,10 @@ Ship.prototype = {
         var moveY = this.speed * this.dir[1];
         this.x += moveX;
         this.y += moveY;
-        // if (this.x + moveX > (0 + ARENA_MARGIN) && (this.x + moveX) < (this.$arena.width() - ARENA_MARGIN)) {
+        // if (this.x + moveX > (0 + ARENA_MARGIN) && (this.x + moveX) < (this.canvas.width() - ARENA_MARGIN)) {
         //     this.x += moveX;
         // }
-        // if (this.y + moveY > (0 + ARENA_MARGIN) && (this.y + moveY) < (this.$arena.height() - ARENA_MARGIN)) {
+        // if (this.y + moveY > (0 + ARENA_MARGIN) && (this.y + moveY) < (this.canvas.height() - ARENA_MARGIN)) {
         //     this.y += moveY;
         // }
     }
