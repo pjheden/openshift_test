@@ -41,7 +41,7 @@ Game.prototype = {
         var that = this;
         this.ships.forEach(function(ship) {
             that.ctx.save();
-            that.ctx.translate(ship.x, ship.x);
+            that.ctx.translate(ship.x, ship.y);
             // that.ctx.rotate(ship.getAngle());
             that.ctx.drawImage(ship.image, ship.image.width / -2, ship.image.height / -2, ship.image.width / 10, ship.image.height / 10);
             that.ctx.restore();
@@ -100,7 +100,13 @@ Game.prototype = {
 
     }
 }
-
+/**
+ * @constructor
+ * @param {string} id - Id for the Ship
+ * @param {html} canvas - The canvas to draw in
+ * @param {integer} x - The x coordinate of the ship
+ * @param {integer} y - The y coordinate of the ship
+ */
 function Ship(id, canvas, x, y) {
     this.id = id;
     this.ctx = canvas[0].getContext('2d');
@@ -110,7 +116,7 @@ function Ship(id, canvas, x, y) {
     this.x = x;
     this.y = y;
     this.dead = false;
-    this.dir = [0, 0, 0, 0];
+    this.dir = [0, 0];
     this.speed = 5;
     console.log('Ship created!');
 
@@ -126,13 +132,17 @@ Ship.prototype = {
     draw: function() {
         console.log('draw ship!');
         this.ctx.save();
-        this.ctx.translate(this.x, this.x);
+        this.ctx.translate(this.x, this.y);
         // this.ctx.rotate(player.getAngle());
         this.ctx.drawImage(this.image, this.image.width / -2, this.image.height / -2, this.image.width / 10, this.image.height / 10);
         this.ctx.restore();
 
     },
 
+    /**
+     * Set the controls for the ship
+     * TODO add rotation
+     */
     setControls: function() {
         var t = this;
         $(document).keypress(function(e) {
@@ -179,6 +189,7 @@ Ship.prototype = {
 
         var moveX = this.speed * this.dir[0];
         var moveY = this.speed * this.dir[1];
+        console.log(moveX, moveY);
         this.x += moveX;
         this.y += moveY;
         // if (this.x + moveX > (0 + ARENA_MARGIN) && (this.x + moveX) < (this.canvas.width() - ARENA_MARGIN)) {

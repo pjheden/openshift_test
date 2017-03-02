@@ -11,14 +11,16 @@ var server = app.listen(process.env.PORT || 8082, function() {
 
 var io = require('socket.io')(server);
 
-//Too keep track of the game
+/**
+ * To keep track of the game
+ * @constructor
+ */
 function GameServer() {
     this.ships = [];
 }
 
 GameServer.prototype = {
     addShip: function(ship) {
-        //TODO check that ship id is unique, if not make it so
         this.ships.push(ship);
     },
     removeShip: function(shipId) {
@@ -58,6 +60,13 @@ io.on('connection', function(client) {
 
     client.on('joinGame', function(player) {
         console.log(player.id + ' joined the game');
+
+				//Check if id is unique, otherwise make it so
+				game.ships.forEach(function(ship){
+					if(ship.id === player.id){
+						player.id = player.id + getRandomInt(1,999);
+					}
+				});
 
         var initX = getRandomInt(300, 900);
         var initY = getRandomInt(200, 600);

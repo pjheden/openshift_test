@@ -37,7 +37,9 @@ $(document).ready( function(){
   //Add onclick to join button
 	$('#join_button').click( function(){
 		player_name = $('#player_name').val();
+    if(player_name == '') player_name = "Buddy";
 		joinGame(player_name, socket);
+    $(this).attr('disabled',true);
 	});
 
 
@@ -50,6 +52,5 @@ $(window).on('beforeunload', function(){
 //tells the server the name of the player
 function joinGame(name, socket){
   console.log('joinGame');
-	if(name == '') name = "Buddy";
 	socket.emit('joinGame', {id: name});
 }
