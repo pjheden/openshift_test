@@ -16,10 +16,11 @@ var io = require('socket.io')(server);
  * @constructor
  */
 function GameServer() {
-    this.ships = [];
-		var wind_interval = 5000;
-
 		var that = this;
+
+    that.ships = [];
+
+		var wind_interval = 5000;
 		setInterval(function() {
         that.updateWind();
     }, wind_interval);
