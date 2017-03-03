@@ -41,6 +41,7 @@ GameServer.prototype = {
             if (this.ships[i].id === ship.id) {
                 this.ships[i].x = ship.x;
                 this.ships[i].y = ship.y;
+								this.ships[i].angle = ship.angle;
             }
         }
     },
@@ -61,7 +62,7 @@ GameServer.prototype = {
         return t;
     },
 		updateWind: function() {
-			this.wind = [getRandomInt(-9,9), getRandomInt(-9,9)];
+			this.wind = [getRandomInt(-3,3), getRandomInt(-3,3)];
 		}
 }
 
@@ -79,8 +80,8 @@ io.on('connection', function(client) {
 				});
 				console.log(player.id + ' joined the game');
 
-        var initX = getRandomInt(300, 900);
-        var initY = getRandomInt(200, 600);
+        var initX = 700;
+        var initY = 450;
 
         //Tell client to add ship
         client.emit('addShip', {
@@ -102,7 +103,8 @@ io.on('connection', function(client) {
         game.addShip({
             id: player.id,
 						x: initX,
-						y: initY
+						y: initY,
+						angle: 0.0
         });
     });
 

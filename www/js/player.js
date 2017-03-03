@@ -11,7 +11,7 @@ function Game(socket, canvasId, w, h) {
     this.ships = [];
     this.playerShip;
 
-    this.wind = [0, 0];
+    this.wind = [1, 1];
     var g = this;
 
     setInterval(function() {
@@ -67,7 +67,8 @@ Game.prototype = {
         var t = {
             id: this.playerShip.id,
             x: this.playerShip.pos.x,
-            y: this.playerShip.pos.y
+            y: this.playerShip.pos.y,
+            angle: this.playerShip.angle
         };
         gameData.ship = t;
 
@@ -91,6 +92,7 @@ Game.prototype = {
                 if (serverShip.id === clientShip.id) {
                     clientShip.x = serverShip.x;
                     clientShip.y = serverShip.y;
+                    clientShip.angle = serverShip.angle;
                     shipFound = true;
                 }
             });
@@ -116,7 +118,7 @@ function Ship(id, canvas, xx, yy) {
     this.image.src = src;
     this.image.width = this.image.width / 10;
     this.image.height = this.image.height / 10;
-    this.speed = 5;
+    this.speed = 2;
 
     // this.pos.x = x;
     // this.pos.y = y;
@@ -211,14 +213,23 @@ Ship.prototype = {
         if (this.dead) {
             return;
         }
+        //Wind calculations
+        var windDirection = normalize(wind[0], wind[1]);
+	      var windMagnitude = lengthVec(wind[0], wind[1]);
+        var cosOfAngle = dotVec(windDirection, this.dir);
+		    var wSpeed = windMagnitude * cosOfAngle;		//If the wind is parallell to the boat then the speed becomes equal to the magnitue of the wind, if it is perpendicular then it becomes 0
+        console.log('wind', wind);
+        console.log('windMagnitude', windMagnitude);
+        console.log('cosOfAngle', cosOfAngle);
+        console.log('wSpeed', wSpeed);
 
-        var moveX = this.speed * this.dir.x;
-        var moveY = this.speed * this.dir.y;
+        var moveX = (this.speed * this.dir.x ) + ( wSpeed * this.dir.x );
+        var moveY = (this.speed * this.dir.y ) + ( wSpeed * this.dir.y );
 
         this.pos.x += moveX;
         this.pos.y += moveY;
 
-        console.log('move', this);
+        //boundary control
         // if (this.pos.x + moveX > (0 + ARENA_MARGIN) && (this.pos.x + moveX) < (this.canvas.width() - ARENA_MARGIN)) {
         //     this.pos.x += moveX;
         // }
