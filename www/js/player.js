@@ -125,6 +125,7 @@ Game.prototype = {
  */
 function Ship(id, canvas, pos) {
     this.id = id;
+    this.canvas = canvas;
     this.ctx = canvas[0].getContext('2d');
     var src = './images/ships/ship_pattern0.png';
     this.image = new Image();
@@ -231,15 +232,12 @@ Ship.prototype = {
         var moveX = (this.speed * this.dir.x) + (wSpeed * this.dir.x);
         var moveY = (this.speed * this.dir.y) + (wSpeed * this.dir.y);
 
-        this.pos.x += moveX;
-        this.pos.y += moveY;
-
         //boundary control
-        // if (this.pos.x + moveX > (0 + ARENA_MARGIN) && (this.pos.x + moveX) < (this.canvas.width() - ARENA_MARGIN)) {
-        //     this.pos.x += moveX;
-        // }
-        // if (this.pos.y + moveY > (0 + ARENA_MARGIN) && (this.pos.y + moveY) < (this.canvas.height() - ARENA_MARGIN)) {
-        //     this.pos.y += moveY;
-        // }
+        if (this.pos.x + moveX > (0 + this.image.width / 2) && (this.pos.x + moveX) < (this.canvas.width - this.image.width / 2)) {
+            this.pos.x += moveX;
+        }
+        if (this.pos.y + moveY > (0 + this.image.height / 2) && (this.pos.y + moveY) < (this.canvas.height - this.image.height / 2)) {
+            this.pos.y += moveY;
+        }
     }
 }
