@@ -19,7 +19,7 @@ function GameServer() {
 		var that = this;
 
     that.ships = [];
-		that.wind = [0, 0];
+		that.wind = [1, 1];
 
 		var wind_interval = 5000;
 		setInterval(function() {
@@ -39,8 +39,7 @@ GameServer.prototype = {
     updateShip: function(ship) {
         for (var i = 0; i < this.ships.length; i++) {
             if (this.ships[i].id === ship.id) {
-                this.ships[i].x = ship.x;
-                this.ships[i].y = ship.y;
+                this.ships[i].pos = ship.pos;
 								this.ships[i].angle = ship.angle;
             }
         }
@@ -83,27 +82,28 @@ io.on('connection', function(client) {
         var initX = 700;
         var initY = 450;
 
-        //Tell client to add ship
-        client.emit('addShip', {
+        var gData = {};
+        gData.ship = {
             id: player.id,
-            x: initX,
-            y: initY,
+            pos: {x: initX, y:initY},
             isPlayer: true
-        });
+        };
+        gData.wind = game.wind;
+        gData.ships = game.ships;
+        //Tell client to add ship and init variables
+        client.emit('initGame', gData);
 
-        //Tell all other clients to add ship
+        //Tell all other clients to add the ship
         client.broadcast.emit('addShip', {
             id: player.id,
-            x: initX,
-            y: initY,
+            pos: {x: initX, y:initY},
             isPlayer: false
         });
 
-        //Add ship to the game
+        //Add the ship to the game
         game.addShip({
             id: player.id,
-						x: initX,
-						y: initY,
+            pos: {x: initX, y:initY},
 						angle: 0.0
         });
     });

@@ -26,18 +26,23 @@ socket.on('serverSync', function(serverData){
 });
 
 socket.on('addShip', function(ship){
-    game.addShip(ship.id, ship.x, ship.y, ship.isPlayer);
+    game.addShip(ship.id, ship.pos, ship.isPlayer);
+});
+
+socket.on('initGame', function(data){
+    game.name = data.ship.id;
+    game.init(data.wind, data.ships);
+    game.addShip(data.ship.id, data.ship.pos, data.ship.isPlayer);
 });
 
 socket.on('removeShip', function(shipId){
     game.removeShip(shipId);
 });
 
-var player_name;
 $(document).ready( function(){
   //Add onclick to join button
 	$('#join_button').click( function(){
-		player_name = $('#player_name').val();
+		var player_name = $('#player_name').val();
     if(player_name == '') player_name = "Buddy";
 		joinGame(player_name, socket);
     $(this).attr('disabled',true);
@@ -47,7 +52,7 @@ $(document).ready( function(){
 });
 
 $(window).on('beforeunload', function(){
-	socket.emit('leaveGame', player_name);
+	socket.emit('leaveGame', game.name);
 });
 
 //tells the server the name of the player

@@ -21,8 +21,23 @@ function Game(socket, canvasId, w, h) {
 
 Game.prototype = {
 
-    addShip: function(id, x, y, isPlayer) {
-        var t = new Ship(id, this.canvas, x, y);
+    init: function(wind, ships) {
+        console.log('init', wind, ships);
+        this.wind = wind;
+        for (var i = 0; i < ships.length; i++) {
+            if (!ships[i].image) {
+                var src = './images/ships/ship_pattern0.png';
+                ships[i].image = new Image();
+                ships[i].image.src = src;
+                ships[i].image.width = ships[i].image.width / 10;
+                ships[i].image.height = ships[i].image.height / 10;
+            }
+            this.ships.push(ships[i]);
+        }
+    },
+
+    addShip: function(id, pos, isPlayer) {
+        var t = new Ship(id, this.canvas, pos);
         this.ships.push(t);
         if (isPlayer) {
             this.playerShip = t;
@@ -66,8 +81,7 @@ Game.prototype = {
         //Send ship data
         var t = {
             id: this.playerShip.id,
-            x: this.playerShip.pos.x,
-            y: this.playerShip.pos.y,
+            pos: this.playerShip.pos,
             angle: this.playerShip.angle
         };
         gameData.ship = t;
@@ -90,13 +104,12 @@ Game.prototype = {
             var shipFound = false;
             game.ships.forEach(function(clientShip) {
                 if (serverShip.id === clientShip.id) {
-                    clientShip.x = serverShip.x;
-                    clientShip.y = serverShip.y;
+                    clientShip.pos = serverShip.pos;
                     clientShip.angle = serverShip.angle;
                     shipFound = true;
                 }
             });
-            if (!shipFound) game.addShip(serverShip.id, serverShip.x, serverShip.y, false);
+            if (!shipFound) game.addShip(serverShip.id, serverShip.pos, false);
         });
 
 
@@ -110,7 +123,7 @@ Game.prototype = {
  * @param {integer} x - The x coordinate of the ship
  * @param {integer} y - The y coordinate of the ship
  */
-function Ship(id, canvas, xx, yy) {
+function Ship(id, canvas, pos) {
     this.id = id;
     this.ctx = canvas[0].getContext('2d');
     var src = './images/ships/ship_pattern0.png';
@@ -124,10 +137,7 @@ function Ship(id, canvas, xx, yy) {
     // this.pos.y = y;
     // this.dir = 0;
 
-    this.pos = {
-        x: xx,
-        y: yy
-    };
+    this.pos = pos;
     this.dir = {
         x: 0,
         y: 0
@@ -157,7 +167,6 @@ Ship.prototype = {
 
     /**
      * Set the controls for the ship
-     * TODO change to rotation
      */
     setControls: function() {
         var t = this;
@@ -215,16 +224,12 @@ Ship.prototype = {
         }
         //Wind calculations
         var windDirection = normalize(wind[0], wind[1]);
-	      var windMagnitude = lengthVec(wind[0], wind[1]);
+        var windMagnitude = lengthVec(wind[0], wind[1]);
         var cosOfAngle = dotVec(windDirection, this.dir);
-		    var wSpeed = windMagnitude * cosOfAngle;		//If the wind is parallell to the boat then the speed becomes equal to the magnitue of the wind, if it is perpendicular then it becomes 0
-        console.log('wind', wind);
-        console.log('windMagnitude', windMagnitude);
-        console.log('cosOfAngle', cosOfAngle);
-        console.log('wSpeed', wSpeed);
+        var wSpeed = windMagnitude * cosOfAngle; //If the wind is parallell to the boat then the speed becomes equal to the magnitue of the wind, if it is perpendicular then it becomes 0
 
-        var moveX = (this.speed * this.dir.x ) + ( wSpeed * this.dir.x );
-        var moveY = (this.speed * this.dir.y ) + ( wSpeed * this.dir.y );
+        var moveX = (this.speed * this.dir.x) + (wSpeed * this.dir.x);
+        var moveY = (this.speed * this.dir.y) + (wSpeed * this.dir.y);
 
         this.pos.x += moveX;
         this.pos.y += moveY;
