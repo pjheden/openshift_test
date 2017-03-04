@@ -1,12 +1,15 @@
 var INTERVAL = 50;
+var WIDTH;
+var HEIGHT;
 
 function Game(socket, canvasId, w, h) {
     this.socket = socket;
-
     this.canvas = $(canvasId);
     this.canvas.width = w;
     this.canvas.height = h;
     this.ctx = this.canvas[0].getContext('2d');
+
+    WIDTH = w; HEIGHT = h;
 
     this.ships = [];
     this.playerShip;
@@ -36,6 +39,16 @@ Game.prototype = {
         }
     },
 
+    mainLoop: function() {
+        this.updateShips(); //Guess where they are going and update their x and y locally, might reduce lag?
+        this.drawShips();
+        if (this.playerShip) {
+            this.playerShip.rotate();
+            this.playerShip.move(this.wind);
+            this.sendData();
+        }
+    },
+
     addShip: function(id, pos, isPlayer) {
         var t = new Ship(id, this.canvas, pos);
         this.ships.push(t);
@@ -54,7 +67,7 @@ Game.prototype = {
      * Draws all the ships on the map
      */
     drawShips: function() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.clearRect(0, 0, WIDTH, HEIGHT);
         var that = this;
         this.ships.forEach(function(ship) {
             that.ctx.save();
@@ -66,13 +79,28 @@ Game.prototype = {
 
     },
 
-    mainLoop: function() {
-        this.drawShips();
-        if (this.playerShip) {
-            this.playerShip.rotate();
-            this.playerShip.move(this.wind);
-            this.sendData();
+    updateShips: function() {
+      var that = this;
+      this.ships.forEach( function(ship) {
+        if(!that.playerShip || ship.id !== that.playerShip.id){
+          //Wind calculations
+          var windDirection = normalize(that.wind[0], that.wind[1]);
+          var windMagnitude = lengthVec(that.wind[0], that.wind[1]);
+          var cosOfAngle = dotVec(windDirection, ship.dir);
+          var wSpeed = windMagnitude * cosOfAngle; //If the wind is parallell to the boat then the speed becomes equal to the magnitue of the wind, if it is perpendicular then it becomes 0
+
+          var moveX = (ship.speed * ship.dir.x) + (wSpeed * ship.dir.x);
+          var moveY = (ship.speed * ship.dir.y) + (wSpeed * ship.dir.y);
+
+          //boundary control
+          if (ship.pos.x + moveX > (0 + ship.image.width / 2) && (ship.pos.x + moveX) < (WIDTH - ship.image.width / 2)) {
+              ship.pos.x += moveX;
+          }
+          if (ship.pos.y + moveY > (0 + ship.image.height / 2) && (ship.pos.y + moveY) < (HEIGHT - ship.image.height / 2)) {
+              ship.pos.y += moveY;
+          }
         }
+      });
     },
 
     sendData: function() {
@@ -82,7 +110,8 @@ Game.prototype = {
         var t = {
             id: this.playerShip.id,
             pos: this.playerShip.pos,
-            angle: this.playerShip.angle
+            angle: this.playerShip.angle,
+            dir: this.playerShip.dir
         };
         gameData.ship = t;
 
@@ -106,6 +135,7 @@ Game.prototype = {
                 if (serverShip.id === clientShip.id) {
                     clientShip.pos = serverShip.pos;
                     clientShip.angle = serverShip.angle;
+                    clientShip.dir = serverShip.dir;
                     shipFound = true;
                 }
             });
@@ -233,10 +263,10 @@ Ship.prototype = {
         var moveY = (this.speed * this.dir.y) + (wSpeed * this.dir.y);
 
         //boundary control
-        if (this.pos.x + moveX > (0 + this.image.width / 2) && (this.pos.x + moveX) < (this.canvas.width - this.image.width / 2)) {
+        if (this.pos.x + moveX > (0 + this.image.width / 2) && (this.pos.x + moveX) < (WIDTH - this.image.width / 2)) {
             this.pos.x += moveX;
         }
-        if (this.pos.y + moveY > (0 + this.image.height / 2) && (this.pos.y + moveY) < (this.canvas.height - this.image.height / 2)) {
+        if (this.pos.y + moveY > (0 + this.image.height / 2) && (this.pos.y + moveY) < (HEIGHT - this.image.height / 2)) {
             this.pos.y += moveY;
         }
     }

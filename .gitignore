@@ -13,5 +13,6 @@ config.xml
 #package.json
 Project_Readme.html
 taco.json
+.vscode
 
 #Meta Files

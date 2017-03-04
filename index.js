@@ -41,6 +41,7 @@ GameServer.prototype = {
             if (this.ships[i].id === ship.id) {
                 this.ships[i].pos = ship.pos;
 								this.ships[i].angle = ship.angle;
+                this.ships[i].dir = ship.dir;
             }
         }
     },
@@ -104,7 +105,8 @@ io.on('connection', function(client) {
         game.addShip({
             id: player.id,
             pos: {x: initX, y:initY},
-						angle: 0.0
+						angle: 0.0,
+            dir: {x: 0, y:0 }
         });
     });
 
