@@ -23,7 +23,6 @@ var canvas = $('#arena');
 var ctx = canvas[0].getContext('2d');
 ctx.canvas.width = window.innerWidth;
 ctx.canvas.height = window.innerHeight;
-console.log(window.innerWidth, window.innerHeight);
 
 var game = new Game(socket, ctx, window.innerWidth, window.innerHeight);
 
@@ -63,6 +62,5 @@ $(window).on('beforeunload', function(){
 
 //tells the server the name of the player
 function joinGame(name, socket){
-  console.log('joinGame');
 	socket.emit('joinGame', {id: name});
 }

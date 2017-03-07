@@ -3,6 +3,7 @@ var WIDTH;
 var HEIGHT;
 
 function Game(socket, ctx, w, h) {
+  console.log('Game constructor');
     this.socket = socket;
     this.ctx = ctx;
 
@@ -22,7 +23,6 @@ function Game(socket, ctx, w, h) {
 Game.prototype = {
 
     init: function(wind, ships) {
-        console.log('init', wind, ships);
         this.wind = wind;
         for (var i = 0; i < ships.length; i++) {
             if (!ships[i].image) {
@@ -156,6 +156,7 @@ Game.prototype = {
  * @param {integer} y - The y coordinate of the ship
  */
 function Ship(id, ctx, pos) {
+  console.log('Ship constructor');
     this.id = id;
     this.ctx = ctx;
     var src = './images/ships/ship_pattern0.png';
@@ -178,16 +179,10 @@ function Ship(id, ctx, pos) {
     this.angle = 0.0;
     this.deltaA = Math.PI / 100;
 
-    console.log('Ship created!');
-
-    this.materialize();
+    this.draw();
 }
 
 Ship.prototype = {
-    materialize: function() {
-
-        this.draw(); //Draw once?
-    },
     draw: function() {
         this.ctx.save();
         this.ctx.translate(this.pos.x, this.pos.y);
