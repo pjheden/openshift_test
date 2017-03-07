@@ -1,4 +1,55 @@
+html, body {
+  width:  100%;
+  height: 100%;
+  margin: 0px;
+  padding: 0px;
+  overflow:hidden;
+}
+
 canvas {
-  border:1px solid #000000;
-  
+}
+
+.scoreboard {
+    position: fixed;
+    top:32px;
+    right:64px;
+    text-align: left;
+    white-space: nowrap;
+    font-size: 12px;
+    overflow: hidden;
+    z-index: 8;
+    display: inline;
+    cursor: default;
+    line-height: 150%;
+}
+
+.join_section {
+  position: fixed;
+  top:47.5%;
+  left:42.5%;
+  padding:1em;
+  border:none;
+  border-radius:1em;
+  background-color: gray;
+
+  text-decoration:none;
+  text-align:center;
+}
+
+#join_button {
+  width:5em; /* setting the width */
+  height:5em;
+  font-style:normal;
+  font-weight:normal;
+  font-family:"Open Sans";
+  font-size:14px;
+  outline:none;
+  color:#fff;
+  border:none;
+  text-decoration:none;
+  text-align:center;
+  cursor:pointer;
+  border-radius:2px;
+  background-color:#96aa39;
+  border-bottom:1px solid #7b8b2f;
 }

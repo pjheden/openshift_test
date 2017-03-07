@@ -19,7 +19,13 @@ socket.on( 'error', function() {
 
 });
 
-var game = new Game(socket, '#arena', 1400, 800);
+var canvas = $('#arena');
+var ctx = canvas[0].getContext('2d');
+ctx.canvas.width = window.innerWidth;
+ctx.canvas.height = window.innerHeight;
+console.log(window.innerWidth, window.innerHeight);
+
+var game = new Game(socket, ctx, window.innerWidth, window.innerHeight);
 
 socket.on('serverSync', function(serverData){
   game.recieveData(serverData);
@@ -45,7 +51,7 @@ $(document).ready( function(){
 		var player_name = $('#player_name').val();
     if(player_name == '') player_name = "Buddy";
 		joinGame(player_name, socket);
-    $(this).attr('disabled',true);
+    $('.join_section').attr('hidden',true);
 	});
 
 

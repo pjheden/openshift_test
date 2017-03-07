@@ -2,12 +2,9 @@ var INTERVAL = 50;
 var WIDTH;
 var HEIGHT;
 
-function Game(socket, canvasId, w, h) {
+function Game(socket, ctx, w, h) {
     this.socket = socket;
-    this.canvas = $(canvasId);
-    this.canvas.width = w;
-    this.canvas.height = h;
-    this.ctx = this.canvas[0].getContext('2d');
+    this.ctx = ctx;
 
     WIDTH = w; HEIGHT = h;
 
@@ -50,7 +47,7 @@ Game.prototype = {
     },
 
     addShip: function(id, pos, isPlayer) {
-        var t = new Ship(id, this.canvas, pos);
+        var t = new Ship(id, this.ctx, pos);
         this.ships.push(t);
         if (isPlayer) {
             this.playerShip = t;
@@ -102,7 +99,9 @@ Game.prototype = {
         }
       });
     },
-
+    /**
+     * Send data to the server about your ship properties
+     */
     sendData: function() {
         //Send local data to server
         var gameData = {};
@@ -122,6 +121,7 @@ Game.prototype = {
 
     /**
      * Recieves data from the server and update the local game accordingly
+     * @param {Object} serverData - The servers data of the game
      */
     recieveData: function(serverData) {
         var game = this;
@@ -146,6 +146,8 @@ Game.prototype = {
 
     }
 }
+
+
 /**
  * @constructor
  * @param {string} id - Id for the Ship
@@ -153,10 +155,9 @@ Game.prototype = {
  * @param {integer} x - The x coordinate of the ship
  * @param {integer} y - The y coordinate of the ship
  */
-function Ship(id, canvas, pos) {
+function Ship(id, ctx, pos) {
     this.id = id;
-    this.canvas = canvas;
-    this.ctx = canvas[0].getContext('2d');
+    this.ctx = ctx;
     var src = './images/ships/ship_pattern0.png';
     this.image = new Image();
     this.image.src = src;
@@ -184,7 +185,6 @@ function Ship(id, canvas, pos) {
 
 Ship.prototype = {
     materialize: function() {
-        // this.canvas.append('<div id="' + this.id + '" class="tank tank' + this.type + '"></div>');
 
         this.draw(); //Draw once?
     },
