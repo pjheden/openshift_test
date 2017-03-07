@@ -19,6 +19,7 @@ function GameServer() {
 		var that = this;
 
     that.ships = [];
+    that.projectiles = [];
 		that.wind = [1, 1];
 
 		var wind_interval = 5000;
@@ -45,11 +46,11 @@ GameServer.prototype = {
             }
         }
     },
-    addProjectile: function() {
-        //TODO
+    addProjectile: function(projectile) {
+        this.projectiles.push(projectile);
     },
     removeProjectile: function() {
-        //TODO
+        //TODO if needed
     },
     detectCollision: function() {
         //TODO
@@ -120,9 +121,9 @@ io.on('connection', function(client) {
 
     });
 
-    client.on('shoot', function(ball) {
-        // var ball = new Ball(ball.ownerId, ball.alpha, ball.x, ball.y );
-        // game.addBall(ball);
+    client.on('shoot', function(proj) {
+        var projectile = new Projectile(proj.ownerId, proj.pos, proj.angle);
+        game.addBall(projectile);
     });
 
     client.on('leaveGame', function(shipId) {
@@ -132,6 +133,29 @@ io.on('connection', function(client) {
     });
 
 });
+
+function Projectile(ownerId, pos, angle){
+  this.ball_speed = 10;
+  this.height = 10;
+  this.pos = pos;
+  this.ownerId = ownerId;
+  this.angle = angle;
+}
+
+Projectile.prototype = {
+
+  //TODO add wind to cannonballs
+  move: function() {
+    //move to trayectory
+		var speedX = this.ball_speed * Math.sin(this.angle);
+		var speedY = -this.ball_speed * Math.cos(this.angle);
+    var speedZ = -1:
+
+		this.pos.x += speedX;
+		this.pos.y += speedY;
+    this.height += speedZ;
+  }
+}
 
 function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min)) + min;
