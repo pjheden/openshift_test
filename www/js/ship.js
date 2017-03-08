@@ -47,7 +47,7 @@ Ship.prototype = {
      */
     setSocket: function(socket) {
       this.socket = socket;
-    }
+    },
 
     /**
      * Set the controls for the ship
