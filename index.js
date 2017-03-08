@@ -136,7 +136,6 @@ io.on('connection', function(client) {
 
 function Projectile(ownerId, pos, angle){
   this.ball_speed = 10;
-  this.height = 10;
   this.pos = pos;
   this.ownerId = ownerId;
   this.angle = angle;
@@ -149,11 +148,9 @@ Projectile.prototype = {
     //move to trayectory
 		var speedX = this.ball_speed * Math.sin(this.angle);
 		var speedY = -this.ball_speed * Math.cos(this.angle);
-    var speedZ = -1:
 
 		this.pos.x += speedX;
 		this.pos.y += speedY;
-    this.height += speedZ;
   }
 }
 
