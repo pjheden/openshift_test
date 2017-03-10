@@ -8,6 +8,7 @@
 function Ship(id, ctx, pos) {
   console.log('Ship constructor');
     this.id = id;
+    this.dead = false;
     this.ctx = ctx;
     var src = './images/ships/ship_pattern0.png';
     this.image = new Image();
@@ -75,6 +76,9 @@ Ship.prototype = {
             var k = e.keyCode || e.which;
             switch (k) {
                 case 87: //W
+                    t.shoot();
+                    break;
+                case 32: //space
                     t.shoot();
                     break;
                 case 68: //D

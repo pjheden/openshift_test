@@ -17,6 +17,7 @@ var io = require('socket.io')(server);
  */
 function GameServer() {
     var that = this;
+    that.projs_created = 0;
 
     that.ships = [];
     that.projectiles = [];
@@ -49,15 +50,30 @@ GameServer.prototype = {
     addProjectile: function (projectile) {
         this.projectiles.push(projectile);
     },
-    removeProjectile: function () {
-        //TODO if needed
+    removeProjectile: function (projId) {
+        this.projectiles = this.projectiles.filter(function (t) {
+            return t.id != projId
+        });
     },
     detectCollision: function () {
-        //TODO
+        var that = this;
+        //For each ship, check if it collides with any projectile
+        that.ships.forEach(function (ship) {
+            that.projectiles.forEach(function (proj) {
+                //TODO this only works if x is center, is it center? testing
+                if (Math.abs(proj.pos.x - ship.pos.x) <= proj.r &&
+                    Math.abs(proj.pos.y - ship.pos.y) <= proj.r &&
+                    proj.ownerId !== ship.id) {
+                    ship.dead = true;
+                    proj.dead = true;
+                }
+            });
+        });
     },
     getData: function () {
         var t = {
             ships: this.ships,
+            projectiles: this.projectiles,
             wind: this.wind
         };
         return t;
@@ -95,6 +111,7 @@ io.on('connection', function (client) {
         };
         gData.wind = game.wind;
         gData.ships = game.ships;
+        gData.projectiles = game.projectiles;
         //Tell client to add ship and init variables
         client.emit('initGame', gData);
 
@@ -121,6 +138,8 @@ io.on('connection', function (client) {
                 y: 0
             }
         });
+
+        //TODO remove all dead tanks and projectiles
     });
 
     client.on('clientSync', function (data) {
@@ -134,8 +153,9 @@ io.on('connection', function (client) {
     });
 
     client.on('shoot', function (proj) {
-        var projectile = new Projectile(proj.ownerId, proj.pos, proj.angle);
+        var projectile = new Projectile('proj' + game.projs_created, proj.ownerId, proj.pos, proj.angle);
         game.addBall(projectile);
+        game.projs_created++;
     });
 
     client.on('leaveGame', function (shipId) {
@@ -146,23 +166,39 @@ io.on('connection', function (client) {
 
 });
 
-function Projectile(ownerId, pos, angle) {
+function Projectile(id, ownerId, pos, angle) {
+    this.id = id;
     this.ball_speed = 10;
+    this.r = 5;
     this.pos = pos;
     this.ownerId = ownerId;
-    this.angle = angle;
+    this.dead = false;
+    this.init(angle);
 }
 
 Projectile.prototype = {
+    /**
+     * Set initial variables for the projectile
+     */
+    init: function (angle) {
+        this.speed = {
+            x: this.ball_speed * Math.sin(angle),
+            y: -this.ball_speed * Math.cos(angle)
+        };
+    },
 
-    //TODO add wind to cannonballs
-    move: function () {
-        //move to trayectory
-        var speedX = this.ball_speed * Math.sin(this.angle);
-        var speedY = -this.ball_speed * Math.cos(this.angle);
-
-        this.pos.x += speedX;
-        this.pos.y += speedY;
+    move: function (wind) {
+        //TODO
+        //   //Wind calculations
+        //   var windDirection = normalize(wind[0], wind[1]);
+        //   var windMagnitude = lengthVec(wind[0], wind[1]);
+        //   //Update projectile position
+        //   var wSpeed = {
+        //     x: windDirection[0] * windMagnitude,
+        //     y: windDirection[1] * windMagnitude
+        //   };
+        //   projectile.speed += projectile.speed + wSpeed;
+        //   projectile.pos += projectile.speed;
     }
 }
 
