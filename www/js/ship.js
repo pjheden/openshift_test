@@ -58,9 +58,12 @@ Ship.prototype = {
         $(document).keypress(function(e) {
             var k = e.keyCode || e.which;
             switch (k) {
-                // case 119: //W
-                //     t.dir.y = -1;
-                //     break;
+                case 119: //W
+                    t.shoot();
+                    break;
+                case 32: //space
+                    t.shoot();
+                    break;
                 case 100: //D
                     t.rotateDir = 1;
                     break;
@@ -75,12 +78,7 @@ Ship.prototype = {
         }).keyup(function(e) {
             var k = e.keyCode || e.which;
             switch (k) {
-                case 87: //W
-                    t.shoot();
-                    break;
-                case 32: //space
-                    t.shoot();
-                    break;
+
                 case 68: //D
                     t.rotateDir = 0;
                     break;
@@ -129,13 +127,16 @@ Ship.prototype = {
 
     /**
      * Emits to the server to shoot and sends all the required information
-     * TODO add cooldown
+     * TODO: add cooldown
      */
     shoot: function() {
       if (this.dead || !this.socket) return;
 
-      var projectile = {};
-
+      var projectile = {
+          ownerId: this.id,
+          pos: this.pos,
+          angle: this.angle
+      };
       this.socket.emit('shoot', projectile);
     }
 }

@@ -3,26 +3,28 @@ var WIDTH;
 var HEIGHT;
 
 function Game(socket, ctx, w, h) {
-  console.log('Game constructor');
+    console.log('Game constructor');
     this.socket = socket;
     this.ctx = ctx;
 
-    WIDTH = w; HEIGHT = h;
+    WIDTH = w;
+    HEIGHT = h;
 
     this.ships = [];
+    this.projectiles = [];
     this.playerShip;
 
     this.wind = [1, 1];
     var g = this;
 
-    setInterval(function() {
+    setInterval(function () {
         g.mainLoop();
     }, INTERVAL);
 }
 
 Game.prototype = {
 
-    init: function(wind, ships) {
+    init: function (wind, ships) {
         this.wind = wind;
         for (var i = 0; i < ships.length; i++) {
             if (!ships[i].image) {
@@ -36,7 +38,7 @@ Game.prototype = {
         }
     },
 
-    mainLoop: function() {
+    mainLoop: function () {
         this.updateAllObjects();
         this.clearMap();
         this.drawShips();
@@ -48,7 +50,7 @@ Game.prototype = {
         }
     },
 
-    addShip: function(id, pos, isPlayer) {
+    addShip: function (id, pos, isPlayer) {
         var t = new Ship(id, this.ctx, pos);
         this.ships.push(t);
         if (isPlayer) {
@@ -58,28 +60,28 @@ Game.prototype = {
         }
     },
 
-    removeShip: function(shipId) {
-        this.ships = this.ships.filter(function(t) {
+    removeShip: function (shipId) {
+        this.ships = this.ships.filter(function (t) {
             return t.id != shipId
         });
     },
     /**
      * Clears the canvas
      */
-    clearMap: function() {
-      this.ctx.clearRect(0, 0, WIDTH, HEIGHT);
+    clearMap: function () {
+        this.ctx.clearRect(0, 0, WIDTH, HEIGHT);
     },
     /**
      * Draws all the ships on the map
      */
-    drawShips: function() {
+    drawShips: function () {
         var that = this;
-        this.ships.forEach(function(ship) {
-          that.ctx.save();
-          that.ctx.translate(ship.pos.x, ship.pos.y);
-          that.ctx.rotate(ship.angle);
-          that.ctx.drawImage(ship.image, ship.image.width / -2, ship.image.height / -2, ship.image.width, ship.image.height);
-          that.ctx.restore();
+        this.ships.forEach(function (ship) {
+            that.ctx.save();
+            that.ctx.translate(ship.pos.x, ship.pos.y);
+            that.ctx.rotate(ship.angle);
+            that.ctx.drawImage(ship.image, ship.image.width / -2, ship.image.height / -2, ship.image.width, ship.image.height);
+            that.ctx.restore();
         });
 
     },
@@ -87,68 +89,70 @@ Game.prototype = {
     /**
      * Draws all the projectiles of the map
      */
-    drawProjectile: function() {
-      var that = this;
-      this.projectiles.forEach( function(proj) {
-        that.ctx.beginPath();
-        that.ctx.arc(proj.pos.x, proj.pos.y, proj.r, 0, 2*Math.PI);
-        that.ctx.stroke();
-      });
+    drawProjectile: function () {
+        var that = this;
+        this.projectiles.forEach(function (proj) {
+            that.ctx.beginPath();
+            that.ctx.arc(proj.pos.x, proj.pos.y, proj.r, 0, 2 * Math.PI);
+            that.ctx.stroke();
+        });
     },
-    updateAllObjects: function() {
-      //Wind calculations
-      var windDirection = normalize(this.wind[0], this.wind[1]);
-      var windMagnitude = lengthVec(this.wind[0], this.wind[1]);
+    updateAllObjects: function () {
+        //Wind calculations
+        var windDirection = normalize(this.wind[0], this.wind[1]);
+        var windMagnitude = lengthVec(this.wind[0], this.wind[1]);
 
-      this.updateShips(windDirection, windMagnitude);
-      this.updateProjectiles(windDirection, windMagnitude);
+        this.updateShips(windDirection, windMagnitude);
+        this.updateProjectiles(windDirection, windMagnitude);
     },
     /**
      * Update the movement of the projectiles locally to reduce lag
      * @param {Vector} windDirection - direction of the wind 2D
      * @param {Double} windMagnitude - Magnitude of the wind
      */
-    updateProjectiles: function(windDirection, windMagnitude) {
-      var that = this;
-      this.projectiles.forEach( function(projectile) {
-        //Update projectile position
-        var wSpeed = {
-          x: windDirection[0] * windMagnitude,
-          y: windDirection[1] * windMagnitude
-        };
-        projectile.speed += projectile.speed + wSpeed;
-        projectile.pos += projectile.speed;
-      });
+    updateProjectiles: function (windDirection, windMagnitude) {
+        var that = this;
+        this.projectiles.forEach(function (proj) {
+            //Update projectile position
+            var wSpeed = {
+                x: windDirection.x * windMagnitude,
+                y: windDirection.y * windMagnitude
+            };
+            proj.speed.x += wSpeed.x;
+            proj.speed.y += wSpeed.y;
+            proj.pos.x += proj.speed.x;
+            proj.pos.y += proj.speed.y;
+        });
 
     },
     /**
      * Make a guess of the ships moevments and update them locally
      */
-    updateShips: function(windDirection, windMagnitude) {
-      var that = this;
-      this.ships.forEach( function(ship) {
-        if(!that.playerShip || ship.id !== that.playerShip.id){
-          //Ship calc based on wind
-          var cosOfAngle = dotVec(windDirection, ship.dir);
-          //If the wind is parallell to the boat then the speed becomes equal to the magnitue of the wind, if it is perpendicular then it becomes 0
-          var wSpeed = windMagnitude * cosOfAngle;
-          var moveX = (ship.speed * ship.dir.x) + (wSpeed * ship.dir.x);
-          var moveY = (ship.speed * ship.dir.y) + (wSpeed * ship.dir.y);
+    updateShips: function (windDirection, windMagnitude) {
+        var that = this;
+        this.ships.forEach(function (ship) {
+            if (!that.playerShip || ship.id !== that.playerShip.id) {
+                //Ship calc based on wind
+                var cosOfAngle = dotVec(windDirection, ship.dir);
+                //If the wind is parallell to the boat then the speed becomes equal to the magnitue of the wind, if it is perpendicular then it becomes 0
+                var wSpeed = windMagnitude * cosOfAngle;
+                var moveX = (ship.speed * ship.dir.x) + (wSpeed * ship.dir.x);
+                var moveY = (ship.speed * ship.dir.y) + (wSpeed * ship.dir.y);
 
-          //boundary control
-          if (ship.pos.x + moveX > (0 + ship.image.width / 2) && (ship.pos.x + moveX) < (WIDTH - ship.image.width / 2)) {
-              ship.pos.x += moveX;
-          }
-          if (ship.pos.y + moveY > (0 + ship.image.height / 2) && (ship.pos.y + moveY) < (HEIGHT - ship.image.height / 2)) {
-              ship.pos.y += moveY;
-          }
-        }
-      });
+                //boundary control
+                if (ship.pos.x + moveX > (0 + ship.image.width / 2) && (ship.pos.x + moveX) < (WIDTH - ship.image.width / 2)) {
+                    ship.pos.x += moveX;
+                }
+                if (ship.pos.y + moveY > (0 + ship.image.height / 2) && (ship.pos.y + moveY) < (HEIGHT - ship.image.height / 2)) {
+                    ship.pos.y += moveY;
+                }
+            }
+        });
     },
     /**
      * Send data to the server about your ship properties
      */
-    sendData: function() {
+    sendData: function () {
         //Send local data to server
         var gameData = {};
         //Send ship data
@@ -169,34 +173,29 @@ Game.prototype = {
      * Recieves data from the server and update the local game accordingly
      * @param {Object} serverData - The servers data of the game
      */
-    recieveData: function(serverData) {
+    recieveData: function (serverData) {
         var game = this;
-        //TODO Add control if proj or ship is alive and if not remove it
-        
         game.wind = serverData.wind;
 
-        serverData.shipsToRemove.forEach( function(shipId){
 
-        });
-        serverData.projToRemove.forEach( function(projId){
-
-        });
-
-        //TODO make a better update system
         //Update ship information
-        serverData.ships.forEach(function(serverShip) {
-            var shipFound = false;
-            game.ships.forEach(function(clientShip) {
-                if (serverShip.id === clientShip.id) {
-                    clientShip.pos = serverShip.pos;
-                    clientShip.angle = serverShip.angle;
-                    clientShip.dir = serverShip.dir;
-                    shipFound = true;
-                }
-            });
-            if (!shipFound) game.addShip(serverShip.id, serverShip.pos, false);
+        serverData.ships.forEach(function (serverShip) {
+            if (serverShip.dead) {
+                game.removeShip(serverShip);
+            } else {
+                var shipFound = false;
+                game.ships.forEach(function (clientShip) {
+                    if (serverShip.id === clientShip.id) {
+                        clientShip.pos = serverShip.pos;
+                        clientShip.angle = serverShip.angle;
+                        clientShip.dir = serverShip.dir;
+                        shipFound = true;
+                    }
+                });
+                if (!shipFound) game.addShip(serverShip.id, serverShip.pos, false);
+            }
         });
 
-        //TODO recieve projectile data
+        game.projectiles = serverData.projectiles;
     }
 }

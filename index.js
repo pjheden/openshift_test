@@ -55,6 +55,12 @@ GameServer.prototype = {
             return t.id != projId
         });
     },
+    updateProjectiles: function() {
+        var that = this;
+        this.projectiles.forEach( function(proj) {
+            proj.move(that.wind);
+        });
+    },
     detectCollision: function () {
         var that = this;
         //For each ship, check if it collides with any projectile
@@ -139,12 +145,15 @@ io.on('connection', function (client) {
             }
         });
 
-        //TODO remove all dead tanks and projectiles
     });
 
     client.on('clientSync', function (data) {
+        //Update projectiles FIXME: this is what Tanks github did, but seems like a horrible system? balls will go faster per client right?
+        game.updateProjectiles();
         //Receive data from clients
         game.updateShip(data.ship);
+
+        game.detectCollision();
 
         //Broadcast data to clients
         client.emit('serverSync', game.getData());
@@ -154,7 +163,7 @@ io.on('connection', function (client) {
 
     client.on('shoot', function (proj) {
         var projectile = new Projectile('proj' + game.projs_created, proj.ownerId, proj.pos, proj.angle);
-        game.addBall(projectile);
+        game.addProjectile(projectile);
         game.projs_created++;
     });
 
@@ -164,15 +173,40 @@ io.on('connection', function (client) {
         client.broadcast.emit('removeShip', shipId);
     });
 
+
+    //Remove all dead tanks and projectiles
+    game.ships.forEach(function (ship) {
+        if (ship.dead) game.removeShip(ship);
+    });
+    game.projectiles.forEach(function (proj) {
+        if (proj.dead) game.removeProjectile(proj);
+    });
+
 });
 
+/**
+ * Constructor for Projectile class
+ * @param {String} id - Unique id
+ * @param {String} ownerId - Id of the owner for projectile
+ * @param {Object} pos - Start position for the projectile
+ * @param {Int} angle - Start angle for the projectile
+ */
 function Projectile(id, ownerId, pos, angle) {
+    // FIXME: Ball need to move slower and be less effected by wind
     this.id = id;
-    this.ball_speed = 10;
-    this.r = 5;
-    this.pos = pos;
+    this.ball_speed = 5;
+    this.r = 7;
+    this.wind_factor = 0.2;
+    this.steps = 0;
+    this.max_steps = 100;
+
+    this.pos = { x: pos.x, y: pos.y };
     this.ownerId = ownerId;
     this.dead = false;
+    this.speed = {
+        x: 0,
+        y: 0
+    };
     this.init(angle);
 }
 
@@ -181,27 +215,58 @@ Projectile.prototype = {
      * Set initial variables for the projectile
      */
     init: function (angle) {
-        this.speed = {
-            x: this.ball_speed * Math.sin(angle),
-            y: -this.ball_speed * Math.cos(angle)
-        };
+        this.speed.x = this.ball_speed * Math.sin(angle);
+        this.speed.y = -this.ball_speed * Math.cos(angle);
     },
 
     move: function (wind) {
-        //TODO
-        //   //Wind calculations
-        //   var windDirection = normalize(wind[0], wind[1]);
-        //   var windMagnitude = lengthVec(wind[0], wind[1]);
-        //   //Update projectile position
-        //   var wSpeed = {
-        //     x: windDirection[0] * windMagnitude,
-        //     y: windDirection[1] * windMagnitude
-        //   };
-        //   projectile.speed += projectile.speed + wSpeed;
-        //   projectile.pos += projectile.speed;
+        if(this.steps >= this.max_steps){
+            this.dead = true;
+            return;
+        }
+
+        //Wind calculations
+        var windDirection = normalize(wind[0], wind[1]);
+        var windMagnitude = lengthVec(wind[0], wind[1]);
+
+        //Update projectile position
+        var wSpeed = {
+            x: windDirection.x * windMagnitude,
+            y: windDirection.y * windMagnitude
+        };
+
+        this.speed.x += wSpeed.x * this.wind_factor;
+        this.speed.y += wSpeed.y * this.wind_factor;
+        this.pos.x += this.speed.x;
+        this.pos.y += this.speed.y;
+
+        this.steps += 1;
     }
 }
 
+
+//Random help functions
+
 function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min)) + min;
+}
+
+function normalize(x, y) {
+    var u = {
+        x: 0,
+        y: 0
+    };
+    var absV = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+
+    u.x = x / absV;
+    u.y = y / absV;
+    return u;
+}
+
+function lengthVec(x, y) {
+    return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+}
+
+function dotVec(v1, v2) {
+    return v1.x * v2.x + v1.y * v2.y;
 }
