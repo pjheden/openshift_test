@@ -200,3 +200,46 @@ Game.prototype = {
         game.projectiles = serverData.projectiles;
     }
 }
+
+
+
+Scoreboard.prototype = {
+
+};
+
+function Killfeed(playerId, tagetId) {
+    this.elemId = playerId + tagetId;
+    this.elem;
+
+    this.intv;
+    this.intvT = 1000;
+}
+
+Killfeed.prototype = {
+    add: function () {
+        var str = '<div id = ' + this.elemId + '>';
+        str += '<span style="opacity:0.6509999999999999; color:#80ff80;">' + playerId + '</span>';
+        str += '<span class="circle"></span>';
+        str += '<span style="opacity:0.6509999999999999; color:#80d0d0;">' + targetId + '</span>';
+        str += '<br></div>';
+        document.getElementsByClassName('killfeed').innerHTML += str;
+
+        this.intv = setInterval(animation, this.intvT);
+    },
+    remove: function () {
+        this.elem.parentNode.removeChild(this.elem);
+    },
+    animation: function () {
+        if(!this.elem){
+            this.elem = document.getElementById(this.elemId);
+        }
+
+        if (this.elem.style.opacity <= 0) {
+            this.remove();
+            clearInterval(this.intv);
+        }else{
+            this.elem.style.opacity = -0.1;
+        }
+    }
+
+};
