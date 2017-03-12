@@ -12,6 +12,7 @@ function Game(socket, ctx, w, h) {
 
     this.ships = [];
     this.projectiles = [];
+    this.feeds = [];
     this.playerShip;
 
     this.wind = [1, 1];
@@ -42,7 +43,8 @@ Game.prototype = {
         this.updateAllObjects();
         this.clearMap();
         this.drawShips();
-        this.drawProjectile();
+        this.drawProjectiless();
+        this.drawFeeds();
         if (this.playerShip) {
             this.playerShip.rotate();
             this.playerShip.move(this.wind);
@@ -89,13 +91,20 @@ Game.prototype = {
     /**
      * Draws all the projectiles of the map
      */
-    drawProjectile: function () {
+    drawProjectiles: function () {
         var that = this;
         this.projectiles.forEach(function (proj) {
             that.ctx.beginPath();
             that.ctx.arc(proj.pos.x, proj.pos.y, proj.r, 0, 2 * Math.PI);
             that.ctx.stroke();
         });
+    },
+    drawFeeds: function() {
+        this.feeds.forEach( function(feed){
+            var kf = new Killfeed(feed.playerId, feed.targetId);
+            kf.draw();
+        });
+        this.feeds = [];
     },
     updateAllObjects: function () {
         //Wind calculations
@@ -198,10 +207,16 @@ Game.prototype = {
         });
 
         game.projectiles = serverData.projectiles;
+
+        serverData.killfeed.forEach( function(feed) {
+            game.feeds.push(feed);
+        });
     }
 }
 
+function Scoreboard(){
 
+}
 
 Scoreboard.prototype = {
 
@@ -216,11 +231,11 @@ function Killfeed(playerId, tagetId) {
 }
 
 Killfeed.prototype = {
-    add: function () {
+    draw: function () {
         var str = '<div id = ' + this.elemId + '>';
-        str += '<span style="opacity:0.6509999999999999; color:#80ff80;">' + playerId + '</span>';
+        str += '<span style="opacity:0.8; color:#80ff80;">' + playerId + '</span>';
         str += '<span class="circle"></span>';
-        str += '<span style="opacity:0.6509999999999999; color:#80d0d0;">' + targetId + '</span>';
+        str += '<span style="opacity:0.8; color:#80d0d0;">' + targetId + '</span>';
         str += '<br></div>';
         document.getElementsByClassName('killfeed').innerHTML += str;
 
@@ -232,6 +247,7 @@ Killfeed.prototype = {
     animation: function () {
         if(!this.elem){
             this.elem = document.getElementById(this.elemId);
+            return;
         }
 
         if (this.elem.style.opacity <= 0) {
