@@ -6,8 +6,6 @@ html, body {
   overflow:hidden;
 }
 
-canvas {
-}
 
 .scoreboard {
     position: fixed;
@@ -21,6 +19,25 @@ canvas {
     display: inline;
     cursor: default;
     line-height: 150%;
+}
+
+.killfeed {
+  position: fixed;
+  top:32px;
+  left:32px;
+  text-align: left;
+  white-space: nowrap;
+  font-size: 12px;
+  overflow: hidden;
+  z-index: 8;
+  display: inline;
+  cursor: default;
+  line-height: 150%;
+}
+
+.circle:before {
+  content: ' \25CF';
+  font-size: 14px;
 }
 
 .join_section {

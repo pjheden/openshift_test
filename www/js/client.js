@@ -1,5 +1,6 @@
-var socket = io.connect('https://last-ship-standing-mp.herokuapp.com/');
-// var socket = io.connect('http://localhost:8082');
+//var socket = io.connect('https://last-ship-standing-mp.herokuapp.com/');
+ var socket = io.connect('http://localhost:8082');
+ 
 socket.on( 'connect', function(e) {
   console.log('You connected to the server!');
 });
@@ -16,7 +17,6 @@ socket.on( 'connect_failed', function() {
 
 socket.on( 'error', function() {
   console.log('error connecting');
-
 });
 
 var canvas = $('#arena');

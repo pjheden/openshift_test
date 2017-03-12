@@ -181,7 +181,7 @@ Game.prototype = {
         //Update ship information
         serverData.ships.forEach(function (serverShip) {
             if (serverShip.dead) {
-                game.removeShip(serverShip);
+                game.removeShip(serverShip.id);
             } else {
                 var shipFound = false;
                 game.ships.forEach(function (clientShip) {
@@ -189,6 +189,7 @@ Game.prototype = {
                         clientShip.pos = serverShip.pos;
                         clientShip.angle = serverShip.angle;
                         clientShip.dir = serverShip.dir;
+                        clientShip.dead = serverShip.dead;
                         shipFound = true;
                     }
                 });
