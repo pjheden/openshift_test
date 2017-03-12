@@ -21,6 +21,7 @@ function GameServer() {
 
     that.ships = [];
     that.projectiles = [];
+    that.killfeed = [];
     that.wind = [1, 1];
 
     var wind_interval = 5000;
@@ -61,28 +62,44 @@ GameServer.prototype = {
             proj.move(that.wind);
         });
     },
+    //FIXME: The hitbox seems to be quite off.
     detectCollision: function () {
         var that = this;
         //For each ship, check if it collides with any projectile
         that.ships.forEach(function (ship) {
-            that.projectiles.forEach(function (proj) {
-                //TODO this only works if x is center, is it center? testing
-                if (Math.abs(proj.pos.x - ship.pos.x) <= proj.r &&
-                    Math.abs(proj.pos.y - ship.pos.y) <= proj.r &&
-                    proj.ownerId !== ship.id) {
-                    ship.dead = true;
-                    proj.dead = true;
-                }
-            });
+            if(!ship.dead){
+                that.projectiles.forEach(function (proj) {
+                    //TODO this only works if x is center, is it center? testing
+                    if (Math.abs(proj.pos.x - ship.pos.x) <= proj.r &&
+                        Math.abs(proj.pos.y - ship.pos.y) <= proj.r &&
+                        proj.ownerId !== ship.id) {
+                        ship.dead = true;
+                        proj.dead = true;
+                        that.killfeed.push({playerId: proj.ownerId, targetId: ship.id});
+                        console.log('collision found!');
+                    }
+                });
+            }
         });
     },
     getData: function () {
+        var feed = [];
+        this.killfeed.forEach(function(f){
+            feed.push(f);
+        })
+        this.clearFeed();
+        
         var t = {
             ships: this.ships,
             projectiles: this.projectiles,
+            killfeed: feed,
             wind: this.wind
         };
+
         return t;
+    },
+    clearFeed: function() {
+        this.killfeed = [];
     },
     updateWind: function () {
         this.wind = [getRandomInt(-3, 3), getRandomInt(-3, 3)];
@@ -158,7 +175,6 @@ io.on('connection', function (client) {
         //Broadcast data to clients
         client.emit('serverSync', game.getData());
         client.broadcast.emit('serverSync', game.getData());
-
     });
 
     client.on('shoot', function (proj) {
@@ -242,8 +258,7 @@ Projectile.prototype = {
 
         this.steps += 1;
     }
-}
-
+};
 
 //Random help functions
 
