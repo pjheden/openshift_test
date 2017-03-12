@@ -43,8 +43,7 @@ Game.prototype = {
         this.updateAllObjects();
         this.clearMap();
         this.drawShips();
-        this.drawProjectiless();
-        this.drawFeeds();
+        this.drawProjectiles();
         if (this.playerShip) {
             this.playerShip.rotate();
             this.playerShip.move(this.wind);
@@ -184,6 +183,7 @@ Game.prototype = {
      */
     recieveData: function (serverData) {
         var game = this;
+        console.log('recieveData', serverData);
         game.wind = serverData.wind;
 
 
@@ -209,7 +209,8 @@ Game.prototype = {
         game.projectiles = serverData.projectiles;
 
         serverData.killfeed.forEach( function(feed) {
-            game.feeds.push(feed);
+            var kf = new Killfeed(feed.playerId, feed.targetId);
+            kf.draw();
         });
     }
 }
@@ -222,8 +223,11 @@ Scoreboard.prototype = {
 
 };
 
-function Killfeed(playerId, tagetId) {
-    this.elemId = playerId + tagetId;
+//FIXME: Seems like only some players gets a feed
+function Killfeed(playerId, targetId) {
+    this.playerId = playerId;
+    this.targetId = targetId;
+    this.elemId = playerId + targetId;
     this.elem;
 
     this.intv;
@@ -232,29 +236,30 @@ function Killfeed(playerId, tagetId) {
 
 Killfeed.prototype = {
     draw: function () {
-        var str = '<div id = ' + this.elemId + '>';
-        str += '<span style="opacity:0.8; color:#80ff80;">' + playerId + '</span>';
+        var str = '<div style="opacity:0.8;" id = ' + this.elemId + '>';
+        str += '<span style="color:#80ff80;">' + this.playerId + '</span>';
         str += '<span class="circle"></span>';
-        str += '<span style="opacity:0.8; color:#80d0d0;">' + targetId + '</span>';
+        str += '<span style="color:#80d0d0;"> ' + this.targetId + '</span>';
         str += '<br></div>';
-        document.getElementsByClassName('killfeed').innerHTML += str;
+        document.getElementsByClassName('killfeed')[0].innerHTML += str;
 
-        this.intv = setInterval(animation, this.intvT);
+        this.intv = setInterval(this.animation, this.intvT);
     },
     remove: function () {
         this.elem.parentNode.removeChild(this.elem);
     },
+    //FIXME: Animation not working
     animation: function () {
         if(!this.elem){
             this.elem = document.getElementById(this.elemId);
             return;
         }
 
-        if (this.elem.style.opacity <= 0) {
+        if (parseInt(this.elem.style.opacity) <= 0) {
             this.remove();
             clearInterval(this.intv);
         }else{
-            this.elem.style.opacity = -0.1;
+            this.elem.style.opacity = parseInt(this.elem.style.opacity) - 0.01;
         }
     }
 
