@@ -17,7 +17,7 @@ var io = require('socket.io')(server);
  */
 function GameServer() {
     var that = this;
-    that.projs_created = 0;
+    that.projs_created = 0; //projectiles created, for unique id's
 
     that.ships = [];
     that.projectiles = [];

@@ -16,8 +16,14 @@ function Game(socket, ctx, w, h) {
     this.playerShip;
 
     this.wind = [1, 1];
-    var g = this;
 
+    this.serverups;
+    this.lastCalledTime_server;
+    this.fps;
+    this.lastCalledTime;
+    this.netgraph = new Netgraph();
+
+    var g = this;
     setInterval(function () {
         g.mainLoop();
     }, INTERVAL);
@@ -41,14 +47,17 @@ Game.prototype = {
 
     mainLoop: function () {
         this.updateAllObjects();
-        this.clearMap();
-        this.drawShips();
-        this.drawProjectiles();
         if (this.playerShip) {
             this.playerShip.rotate();
             this.playerShip.move(this.wind);
             this.sendData();
         }
+        this.clearMap();
+        this.drawShips();
+        this.drawProjectiles();
+
+        this.fps = this.requestAnimFrame(this.lastCalledTime);
+        this.netgraph.update(this.fps, this.serverups);
     },
 
     addShip: function (id, pos, isPlayer) {
@@ -157,6 +166,24 @@ Game.prototype = {
             }
         });
     },
+    requestAnimFrame: function() {
+        if(!this.lastCalledTime) {
+            this.lastCalledTime = Date.now();
+            return 0;
+        }
+        var delta = (Date.now() - this.lastCalledTime)/1000;
+        this.lastCalledTime = Date.now();
+        return 1/delta;
+    },
+    serverResponseTime: function() {
+        if(! this.lastCalledTime_server) {
+             this.lastCalledTime_server = Date.now();
+            return 0;
+        }
+        delta = (Date.now() -  this.lastCalledTime_server)/1000;
+        this.lastCalledTime_server = Date.now();
+        return delta;
+    },
     /**
      * Send data to the server about your ship properties
      */
@@ -183,7 +210,8 @@ Game.prototype = {
      */
     recieveData: function (serverData) {
         var game = this;
-        console.log('recieveData', serverData);
+        game.serverups = game.serverResponseTime(game.lastCalledTime_server);
+
         game.wind = serverData.wind;
 
 
@@ -212,6 +240,29 @@ Game.prototype = {
             var kf = new Killfeed(feed.playerId, feed.targetId);
             kf.draw();
         });
+    }
+}
+
+//TODO: put these classes in seperate files
+function Netgraph(){
+    this.updateCD = 5;
+    this.counter = 0;
+}
+
+Netgraph.prototype = {
+    update: function(fps, time) {
+        if(this.counter >= this.updateCD){
+            this.drawFPS(fps);
+            this.drawResponseTime(time);
+            this.counter = 0;
+        }
+        this.counter++;
+    },
+    drawFPS: function (fps) {
+        document.getElementById('fps').innerHTML = 'FPS: ' + fps;
+    },
+    drawResponseTime: function(time) {
+        document.getElementById('time').innerHTML = 'Server response time: ' + time;
     }
 }
 

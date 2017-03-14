@@ -40,6 +40,20 @@ html, body {
   font-size: 14px;
 }
 
+.netgraph {
+  position: fixed;
+  bottom:32px;
+  left:32px;
+  text-align: left;
+  white-space: nowrap;
+  font-size: 12px;
+  overflow: hidden;
+  z-index: 8;
+  display: inline;
+  cursor: default;
+  line-height: 150%;
+}
+
 .join_section {
   position: fixed;
   top:47.5%;
