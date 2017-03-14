@@ -175,6 +175,14 @@ io.on('connection', function (client) {
         //Broadcast data to clients
         client.emit('serverSync', game.getData());
         client.broadcast.emit('serverSync', game.getData());
+
+        //Remove all dead ships and projectiles
+        game.ships.forEach(function (ship) {
+            if (ship.dead) game.removeShip(ship.id);
+        });
+        game.projectiles.forEach(function (proj) {
+            if (proj.dead) game.removeProjectile(proj.id);
+        });
     });
 
     client.on('shoot', function (proj) {
@@ -187,15 +195,6 @@ io.on('connection', function (client) {
         console.log(shipId + ' has left the game');
         game.removeShip(shipId);
         client.broadcast.emit('removeShip', shipId);
-    });
-
-
-    //Remove all dead tanks and projectiles
-    game.ships.forEach(function (ship) {
-        if (ship.dead) game.removeShip(ship);
-    });
-    game.projectiles.forEach(function (proj) {
-        if (proj.dead) game.removeProjectile(proj);
     });
 
 });
