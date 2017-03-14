@@ -53,6 +53,8 @@ Game.prototype = {
             this.sendData();
         }
         this.clearMap();
+        //TODO: Draw wind direciton, perhaps a nice opague arrow beneath playerShip
+        // If it becomes good, remove html arrow.
         this.drawShips();
         this.drawProjectiles();
 
@@ -245,7 +247,7 @@ Game.prototype = {
 
 //TODO: put these classes in seperate files
 function Netgraph(){
-    this.updateCD = 5;
+    this.updateCD = 20;
     this.counter = 0;
 }
 
@@ -259,10 +261,10 @@ Netgraph.prototype = {
         this.counter++;
     },
     drawFPS: function (fps) {
-        document.getElementById('fps').innerHTML = 'FPS: ' + fps;
+        document.getElementById('fps').innerHTML = 'FPS: ' + Math.round(fps);
     },
     drawResponseTime: function(time) {
-        document.getElementById('time').innerHTML = 'Server response time: ' + time;
+        document.getElementById('time').innerHTML = 'Server response time: ' + Math.round(time, 3);
     }
 }
 

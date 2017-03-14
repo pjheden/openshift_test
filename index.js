@@ -209,9 +209,9 @@ io.on('connection', function (client) {
 function Projectile(id, ownerId, pos, angle) {
     // FIXME: Ball need to move slower and be less effected by wind
     this.id = id;
-    this.ball_speed = 5;
+    this.ball_speed = 10;
     this.r = 7;
-    this.wind_factor = 0.2;
+    this.wind_factor = 0.1;
     this.steps = 0;
     this.max_steps = 100;
 
