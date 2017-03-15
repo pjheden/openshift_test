@@ -26,7 +26,7 @@ function GameServer() {
 
     var wind_interval = 5000;
     setInterval(function () {
-        that.updateWind();
+        //that.updateWind(); FIXME: temprorarily shut off wind for easier testing
     }, wind_interval);
 }
 
@@ -45,6 +45,7 @@ GameServer.prototype = {
                 this.ships[i].pos = ship.pos;
                 this.ships[i].angle = ship.angle;
                 this.ships[i].dir = ship.dir;
+                this.ships[i].collision = ship.collision;
             }
         }
     },
@@ -70,8 +71,8 @@ GameServer.prototype = {
             if(!ship.dead){
                 that.projectiles.forEach(function (proj) {
                     //TODO this only works if x is center, is it center? testing
-                    if (Math.abs(proj.pos.x - ship.pos.x) <= proj.r &&
-                        Math.abs(proj.pos.y - ship.pos.y) <= proj.r &&
+                    if (Math.abs(proj.pos.x - ship.pos.x) <= ( proj.r + ship.collision / 2 ) &&
+                        Math.abs(proj.pos.y - ship.pos.y) <= ( proj.r + ship.collision / 2 ) &&
                         proj.ownerId !== ship.id) {
                         ship.dead = true;
                         proj.dead = true;
@@ -159,7 +160,8 @@ io.on('connection', function (client) {
             dir: {
                 x: 0,
                 y: 0
-            }
+            },
+            collision: 0
         });
 
     });

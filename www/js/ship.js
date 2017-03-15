@@ -30,6 +30,8 @@ function Ship(id, ctx, pos) {
     this.angle = 0.0;
     this.deltaA = Math.PI / 100;
 
+    this.collision = this.image.height / 2;
+
     this.draw();
 }
 

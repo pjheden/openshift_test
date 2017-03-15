@@ -1,4 +1,4 @@
-var INTERVAL = 50;
+var INTERVAL = 30;
 var WIDTH;
 var HEIGHT;
 
@@ -55,6 +55,7 @@ Game.prototype = {
         this.clearMap();
         //TODO: Draw wind direciton, perhaps a nice opague arrow beneath playerShip
         // If it becomes good, remove html arrow.
+        // Also draw circle around ship? "Wacraft3 selected unit"
         this.drawShips();
         this.drawProjectiles();
 
@@ -92,8 +93,15 @@ Game.prototype = {
             that.ctx.save();
             that.ctx.translate(ship.pos.x, ship.pos.y);
             that.ctx.rotate(ship.angle);
+            
             that.ctx.drawImage(ship.image, ship.image.width / -2, ship.image.height / -2, ship.image.width, ship.image.height);
             that.ctx.restore();
+
+            that.ctx.beginPath();
+            that.ctx.arc(ship.pos.x, ship.pos.y, ship.image.width / 2, 0, 2 * Math.PI); //good visual
+            //that.ctx.arc(ship.pos.x, ship.pos.y, ship.image.height / 2, 0, 2 * Math.PI); //hit detection
+            that.ctx.stroke();
+            that.ctx.closePath();
         });
 
     },
@@ -197,7 +205,8 @@ Game.prototype = {
             id: this.playerShip.id,
             pos: this.playerShip.pos,
             angle: this.playerShip.angle,
-            dir: this.playerShip.dir
+            dir: this.playerShip.dir,
+            collision: this.playerShip.collision
         };
         gameData.ship = t;
 
@@ -264,7 +273,7 @@ Netgraph.prototype = {
         document.getElementById('fps').innerHTML = 'FPS: ' + Math.round(fps);
     },
     drawResponseTime: function(time) {
-        document.getElementById('time').innerHTML = 'Server response time: ' + Math.round(time, 3);
+        document.getElementById('time').innerHTML = 'Server response time: ' + time;
     }
 }
 
