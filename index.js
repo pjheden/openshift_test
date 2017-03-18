@@ -24,6 +24,8 @@ function GameServer() {
 	that.killfeed = [];
 	that.wind = [1, 1];
 
+	/*that.scoreboard = new Scoreboard();*/
+
 	var wind_interval = 5000;
 	setInterval(function () {
 		//that.updateWind(); FIXME: temprorarily shut off wind for easier testing
@@ -87,18 +89,18 @@ GameServer.prototype = {
 		});
 	},
 	getData: function () {
-		var feed = [];
-		this.killfeed.forEach(function (f) {
-			feed.push(f);
-		})
-		this.clearFeed();
 
 		var t = {
 			ships: this.ships,
 			projectiles: this.projectiles,
-			killfeed: feed,
+			killfeed: this.killfeed,
 			wind: this.wind
 		};
+
+		/*if(that.scoreboard.updated){
+			t.scores = that.scoreboard.scores;
+			that.scoreboard.setUpdated(False);
+		}*/
 
 		return t;
 	},
@@ -175,6 +177,8 @@ io.on('connection', function (client) {
 		//Receive data from clients
 		game.updateShip(data.ship);
 
+		//game.scoreboard.add(data.score);
+
 		game.detectCollision();
 
 		//Broadcast data to clients
@@ -188,6 +192,8 @@ io.on('connection', function (client) {
 		game.projectiles.forEach(function (proj) {
 			if (proj.dead) game.removeProjectile(proj.id);
 		});
+
+		this.clearFeed();
 	});
 
 	client.on('shoot', function (proj) {
@@ -211,6 +217,39 @@ io.on('connection', function (client) {
  * @param {Object} pos - Start position for the projectile
  * @param {Int} angle - Start angle for the projectile
  */
+
+function Scoreboard(){
+	this.mlength = 10;
+	this.updated = false;
+	this.scores = [];
+}
+
+Scoreboard.prototype = {
+	//Add if list is less than 10 or higher than the lowest one
+	add: function(value, name) {
+		if(this.scores.length < this.mlength || value > this.scores(this.scores.length-1).value ){
+			this.scores.push({
+				value: value,
+				name: name
+			});
+			this.setUpdated(true);
+		}
+	},
+	setUpdated: function(isUptaded){
+		this.updated = isUptaded;
+	},
+	resize: function(){
+		if(this.score.length > this.mlength){
+			this.scores = this.scores.slice(0, this.mlength);
+		}
+	},
+	sortArr: function() {
+		this.scores.sort(function(a, b){
+			return a.value < b.value;
+		});
+	}
+};
+
 function Projectile(id, ownerId, pos, angle) {
 	// FIXME: Ball need to move slower and be less effected by wind
 	this.id = id;
