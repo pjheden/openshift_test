@@ -1,2 +1,9 @@
-TODO:
+----What to do----
+
+Functional leaderboard
+    -Serverside in ram? So is it who's the best right now, or is it history based?
+Check if killfeed has a bug still
+    -Only shows on some screens
 Splash animation for projectile
+Ship death animation
+Go through all FIXME: and TODO:

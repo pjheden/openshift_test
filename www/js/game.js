@@ -90,6 +90,17 @@ Game.prototype = {
     drawShips: function () {
         var that = this;
         this.ships.forEach(function (ship) {
+
+            //Draw wind arrow udnder ship
+            //that.ctx.rotate( Math.atan( that.wind[1]/ that.wind[0] ) );
+            var windAngle = Math.atan( that.wind[1]/ that.wind[0] );
+            that.ctx.beginPath();
+            that.ctx.moveTo(ship.pos.x, ship.pos.y);
+            that.ctx.lineTo(ship.pos.x + (ship.image.width /2) * Math.sin(windAngle),ship.pos.y +  (ship.image.width /2)* Math.cos(windAngle));
+            that.ctx.stroke();
+            that.ctx.closePath();
+
+            //Draw ship
             that.ctx.save();
             that.ctx.translate(ship.pos.x, ship.pos.y);
             that.ctx.rotate(ship.angle);
@@ -97,6 +108,7 @@ Game.prototype = {
             that.ctx.drawImage(ship.image, ship.image.width / -2, ship.image.height / -2, ship.image.width, ship.image.height);
             that.ctx.restore();
 
+            //Draw circle around ship
             that.ctx.beginPath();
             that.ctx.arc(ship.pos.x, ship.pos.y, ship.image.width / 2, 0, 2 * Math.PI); //good visual
             //that.ctx.arc(ship.pos.x, ship.pos.y, ship.image.height / 2, 0, 2 * Math.PI); //hit detection
