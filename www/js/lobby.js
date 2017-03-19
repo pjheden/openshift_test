@@ -21,33 +21,50 @@ Lobby.prototype = {
         this.inited = true;
         var that = this;
         lobbyData.players.forEach(function(player){
-            that.addPlayer(player);
+            that.addPlayer(player, false);
         });
     },
     
-    drawPlayer: function(player) {
-        var str = '<div class="lobbyelement" id="'+player.id+'" onclick=lobby.clickPlayer('+player.id+')>';
-        str += '<h3>'+ player.id +'</h3>'
-        str += '<h3>'+ player.score +'</h3>'
-        str += '</div><br>';
+    drawPlayer: function(player, isPlayer = false) {
+        var str = '<div class="lobbyelement" id="'+player.id+'" onclick=lobby.challengePlayer('+player.id+')>';
+        str += '<div><h3>'+ player.id +'</h3>'
+        str += '<h3>'+ player.score +'</h3></div>'
+        str += '</div>';
+        if(!isPlayer){
+            str += '<div id="'+player.id+'btndiv"><button id="'+player.id+'accbtn" style="width:50%;" disabled>Y</button>';
+            str += '<button id="'+player.id+'decbtn" style="width:50%;" disabled>N</button></div>';
+        }
+        str += '<br>';
         document.getElementsByClassName('lobby')[0].innerHTML += str;
     },
     undrawPlayer: function(playerId) {
         var elem = document.getElementById(playerId);
         if(elem) elem.parentElement.removeChild(elem);
+        var elem2 = document.getElementById(playerId + 'btndiv');
+        if(elem2) elem2.parentElement.removeChild(elem2);
     },
-    clickPlayer: function(playerElement) {
-        console.log(this.player.id +' challenged ' + playerElement.id);
-        //TODO: challenge player
+    challengePlayer: function(playerElement) {
+        if(this.player.id === playerElement.id) return;
+        socket.emit('challenge', {
+            challenger: this.player.id,
+            challenged: playerElement.id
+        });
     },
-
+    challenged: function(challengerId, message){
+        var accButton = document.getElementById(challengerId+'accbtn');
+        var decButton = document.getElementById(challengerId+'decbtn');
+        accButton.disabled = false;
+        decButton.disabled = false;
+        accButton.style.background = 'green';
+        decButton.style.background = 'red';
+    },
     addPlayer: function (player, isPlayer) {
         if(!this.inited) return;
+        if(isPlayer) this.player = player;
         console.log('addPlayer');
         this.players.push(player);
-        this.drawPlayer(player);
+        this.drawPlayer(player, isPlayer);
 
-        if(isPlayer) this.player = player;
     },
 
     removePlayer: function (playerId) {

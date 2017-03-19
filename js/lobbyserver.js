@@ -15,6 +15,16 @@ module.exports = {
 			return t.id != playerId
 		});
 	},
+	getSocketId: function(playerId) {
+		var socketId;
+		this.players.forEach( function(player) {
+			if(player.id === playerId){
+				socketId = player.socketId;
+				return;
+			}
+		});
+		return socketId;
+	},
 	getData: function () {
 
 		var t = {

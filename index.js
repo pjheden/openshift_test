@@ -20,7 +20,7 @@ var server = app.listen(process.env.PORT || 8082, function () {
 var io = require('socket.io')(server);
 
 io.on('connection', function (client) {
-	console.log('User connected');
+	console.log('User connected:', client.client.conn.id);
 
     client.on('joinLobby', function(player) {
         //Check if id is unique, otherwise make it so
@@ -41,6 +41,7 @@ io.on('connection', function (client) {
 
         client.broadcast.emit('addPlayer', player);
 
+        player.socketId = client.client.conn.id;
         lobbyserver.addPlayer(player);
     });
 
@@ -49,5 +50,14 @@ io.on('connection', function (client) {
 		lobbyserver.removePlayer(playerId);
 		client.broadcast.emit('removePlayer', playerId);
 	});
+
+    client.on('challenge', function(challenge){
+        console.log(challenge.challenger + ' challenged ' + challenge.challenged);
+        client.to(lobbyserver.getSocketId(challenge.challenged))
+            .emit('challenge', {
+                challengerId: challenge.challenger,
+                message: 'I challenge you!'
+            });
+    });
 
 });

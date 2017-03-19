@@ -89,3 +89,7 @@ socket.on('addPlayer', function(player){
 socket.on('removePlayer', function(playerId){
   lobby.removePlayer(playerId);
 });
+
+socket.on('challenge', function(ch){
+  lobby.challenged(ch.challengerId, ch.message);
+});
