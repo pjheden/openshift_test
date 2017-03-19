@@ -1,5 +1,5 @@
-var socket = io.connect('https://last-ship-standing-mp.herokuapp.com/');
-//var socket = io.connect('http://localhost:8082');
+//var socket = io.connect('https://last-ship-standing-mp.herokuapp.com/');
+var socket = io.connect('http://localhost:8082');
  
 socket.on( 'connect', function(e) {
   console.log('You connected to the server!');
@@ -92,4 +92,10 @@ socket.on('removePlayer', function(playerId){
 
 socket.on('challenge', function(ch){
   lobby.challenged(ch.challengerId, ch.message);
+});
+
+socket.on('joinRoom', function(roomId){
+  document.getElementsByClassName('lobby')[0].style.visibility = 'hidden';
+  //TODO: Start the game
+  socket.emit('joinRoom', roomId);
 });

@@ -56,8 +56,20 @@ io.on('connection', function (client) {
         client.to(lobbyserver.getSocketId(challenge.challenged))
             .emit('challenge', {
                 challengerId: challenge.challenger,
+
                 message: 'I challenge you!'
             });
     });
+
+	client.on('acceptChallenge', function(challenge){
+		//create unique room id
+		var roomId = '9a9aa9a';
+		client.emit('joinRoom', roomId);
+		client.to(lobbyserver.getSocketId(challenge.challenger)).emit('joinRoom', roomId);
+    });
+
+	client.on('joinRoom', function(roomId){
+		client.join(roomId);
+	});
 
 });

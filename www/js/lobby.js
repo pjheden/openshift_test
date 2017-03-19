@@ -31,8 +31,8 @@ Lobby.prototype = {
         str += '<h3>'+ player.score +'</h3></div>'
         str += '</div>';
         if(!isPlayer){
-            str += '<div id="'+player.id+'btndiv"><button id="'+player.id+'accbtn" style="width:50%;" disabled>Y</button>';
-            str += '<button id="'+player.id+'decbtn" style="width:50%;" disabled>N</button></div>';
+            str += '<div id="'+player.id+'btndiv"><button id="'+player.id+'accbtn" style="width:50%;" disabled onclick=lobby.acceptChallenge('+player.id+')>Y</button>';
+            str += '<button id="'+player.id+'decbtn" style="width:50%;" disabled onclick=lobby.declineChallenge('+player.id+')>N</button></div>';
         }
         str += '<br>';
         document.getElementsByClassName('lobby')[0].innerHTML += str;
@@ -51,12 +51,31 @@ Lobby.prototype = {
         });
     },
     challenged: function(challengerId, message){
+        this.setButton(true, challengerId);
+    },
+    acceptChallenge: function(playerElement){
+        socket.emit('acceptChallenge', {challenger: playerElement.id, challenged: this.player.id});
+    },
+    declineChallenge: function(challengerId){
+        this.setButton(false, challengerId);
+        //TODO: emit decline
+    },
+    setButton: function(active, challengerId){
         var accButton = document.getElementById(challengerId+'accbtn');
         var decButton = document.getElementById(challengerId+'decbtn');
-        accButton.disabled = false;
-        decButton.disabled = false;
-        accButton.style.background = 'green';
-        decButton.style.background = 'red';
+        if(active){
+            accButton.disabled = false;
+            decButton.disabled = false;
+            accButton.style.background = 'green';
+            decButton.style.background = 'red';
+
+        }else{
+            accButton.disabled = true;
+            decButton.disabled = true;
+            accButton.style.background = 'none';
+            decButton.style.background = 'none';
+
+        }
     },
     addPlayer: function (player, isPlayer) {
         if(!this.inited) return;
