@@ -1,4 +1,17 @@
 //gameserver.js
+//http://stackoverflow.com/questions/6998355/including-javascript-class-definition-from-another-file-in-node-js
+//https://www.phpied.com/3-ways-to-define-a-javascript-class/
+//TODO: Make this class like this, so we can create a new one per game (room)
+// module.exports = function GameServer() {
+// 	this.type = type;
+//     this.color = "red";
+//     this.getInfo = function() {
+//         return this.color + ' ' + this.type + ' apple';
+//     };
+// }
+// var User = require('./user.js');
+// var user = new User();
+
 module.exports = {
     /**
      * To keep track of the game

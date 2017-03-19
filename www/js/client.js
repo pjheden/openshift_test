@@ -1,5 +1,7 @@
 //var socket = io.connect('https://last-ship-standing-mp.herokuapp.com/');
 var socket = io.connect('http://localhost:8082');
+
+// -------------- General -----------------
  
 socket.on( 'connect', function(e) {
   console.log('You connected to the server!');
@@ -24,6 +26,26 @@ var ctx = canvas[0].getContext('2d');
 ctx.canvas.width = window.innerWidth;
 ctx.canvas.height = window.innerHeight;
 
+
+$(document).ready( function(){
+  //Add onclick to join button
+	$('#join_button').click( function(){
+		var player_name = $('#player_name').val();
+    if(player_name == '') player_name = "Buddy";
+		//joinGame(player_name, socket);
+    joinLobby(player_name, socket);
+    $('.join_section').attr('hidden',true);
+	});
+
+});
+
+$(window).on('beforeunload', function(){
+	//socket.emit('leaveGame', game.name);
+	socket.emit('leaveGame', lobby.name);
+});
+
+// ------------- Game --------------
+
 var game = new Game(socket, ctx, window.innerWidth, window.innerHeight);
 
 socket.on('serverSync', function(serverData){
@@ -45,22 +67,7 @@ socket.on('removeShip', function(shipId){
 });
 
 
-$(document).ready( function(){
-  //Add onclick to join button
-	$('#join_button').click( function(){
-		var player_name = $('#player_name').val();
-    if(player_name == '') player_name = "Buddy";
-		//joinGame(player_name, socket);
-    joinLobby(player_name, socket);
-    $('.join_section').attr('hidden',true);
-	});
 
-});
-
-$(window).on('beforeunload', function(){
-	//socket.emit('leaveGame', game.name);
-	socket.emit('leaveGame', lobby.name);
-});
 
 //tells the server the name of the player
 function joinGame(name, socket){
@@ -69,7 +76,7 @@ function joinGame(name, socket){
 
 
 
-//Lobby
+//------------Lobby--------------
 function joinLobby(name, socket){
 	socket.emit('joinLobby', {id: name, score: 0});
 }
@@ -99,3 +106,6 @@ socket.on('joinRoom', function(roomId){
   //TODO: Start the game
   socket.emit('joinRoom', roomId);
 });
+
+
+

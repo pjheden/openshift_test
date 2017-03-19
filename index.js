@@ -62,6 +62,17 @@ io.on('connection', function (client) {
     });
 
 	client.on('acceptChallenge', function(challenge){
+        //Idea: TODO:
+        // create the room and store in a map,
+        // rooms[roomId] = {
+        //     playersExpected: x,
+        //     players: 0,
+        //     gameserver: gs
+        // }
+        // Then in joinRoom, we can check if players == playersExpected
+        // Then start a countdown to begin the game
+        // Need a gameserver per room?
+
 		//create unique room id
 		var roomId = '9a9aa9a';
 		client.emit('joinRoom', roomId);
