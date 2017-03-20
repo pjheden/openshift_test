@@ -54,7 +54,7 @@ Lobby.prototype = {
         this.setButton(true, challengerId);
     },
     acceptChallenge: function(playerElement){
-        socket.emit('acceptChallenge', {challenger: playerElement.id, challenged: this.player.id});
+        socket.emit('acceptChallenge', {challenger: playerElement.id, challenged: this.player.id, nrOfPlayers:2});
     },
     declineChallenge: function(challengerId){
         this.setButton(false, challengerId);

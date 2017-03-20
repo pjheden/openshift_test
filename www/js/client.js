@@ -57,9 +57,10 @@ socket.on('addShip', function(ship){
 });
 
 socket.on('initGame', function(data){
-    game.name = data.ship.id;
-    game.init(data.wind, data.ships);
-    game.addShip(data.ship.id, data.ship.pos, data.ship.isPlayer);
+    console.log('initGame', data);
+    game.name = lobby.name;
+    game.init(data.wind, data.ships, data.roomId);
+    game.addShip(lobby.name, data.ship.pos, data.ship.isPlayer);
 });
 
 socket.on('removeShip', function(shipId){

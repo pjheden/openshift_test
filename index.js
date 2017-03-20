@@ -1,7 +1,7 @@
 var express = require('express');
 var app = express();
 
-//var gameserver = require('./js/gameserver.js');
+var Gameserver = require('./js/gameserver.js');
 var lobbyserver = require('./js/lobbyserver.js');
 // var projectile = require('./js/projectile.js');
 // var scoreboard = require('./js/scoreboard.js');
@@ -62,25 +62,64 @@ io.on('connection', function (client) {
     });
 
 	client.on('acceptChallenge', function(challenge){
-        //Idea: TODO:
-        // create the room and store in a map,
-        // rooms[roomId] = {
-        //     playersExpected: x,
-        //     players: 0,
-        //     gameserver: gs
-        // }
         // Then in joinRoom, we can check if players == playersExpected
         // Then start a countdown to begin the game
         // Need a gameserver per room?
 
-		//create unique room id
-		var roomId = '9a9aa9a';
+		var roomId = tools.makeId(6);
+        lobbyserver.rooms[roomId] = {
+            playersExpected: challenge.nrOfPlayers,
+            nrOfPlayers: 0,
+            gameserver: new Gameserver(roomId)
+        };
+
 		client.emit('joinRoom', roomId);
 		client.to(lobbyserver.getSocketId(challenge.challenger)).emit('joinRoom', roomId);
     });
 
 	client.on('joinRoom', function(roomId){
+        var room =  lobbyserver.rooms[roomId];
+        room.nrOfPlayers += 1;
 		client.join(roomId);
+
+        if(room.nrOfPlayers == room.playersExpected){
+            //TODO: add countdown
+            io.to(roomId).emit('initGame', room.gameserver.getData(true));
+        }
+	});
+
+    // ----------- Game ----------------
+
+    client.on('clientSync', function (data) {
+        //TODO: Ships aren't added to the game, look at index_old.js
+
+        
+        if(!lobbyserver.rooms[data.roomId]) return;
+        var game = lobbyserver.rooms[data.roomId].gameserver;
+        console.log(game.getData());
+		//Update projectiles FIXME: this is what Tanks github did, but seems like a horrible system? balls will go faster per client right?
+		game.updateProjectiles();
+		//Receive data from clients
+		game.updateShip(data.ship);
+
+		//game.scoreboard.add(data.score);
+
+		game.detectCollision();
+
+        
+		//Broadcast data to clients
+		client.to(data.roomId).emit('serverSync', game.getData());
+		// client.broadcast.emit('serverSync', game.getData());
+
+		//Remove all dead ships and projectiles
+		game.ships.forEach(function (ship) {
+			if (ship.dead) game.removeShip(ship.id);
+		});
+		game.projectiles.forEach(function (proj) {
+			if (proj.dead) game.removeProjectile(proj.id);
+		});
+
+		//this.clearFeed();
 	});
 
 });

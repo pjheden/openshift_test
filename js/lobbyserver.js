@@ -6,6 +6,7 @@ module.exports = {
      */
     init: function() {
         this.players = [];
+		this.rooms = {};
     },
     addPlayer: function (player) {
 		this.players.push(player);

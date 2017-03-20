@@ -6,6 +6,7 @@ function Game(socket, ctx, w, h) {
     console.log('Game constructor');
     this.socket = socket;
     this.ctx = ctx;
+    this.roomId;
 
     WIDTH = w;
     HEIGHT = h;
@@ -23,15 +24,13 @@ function Game(socket, ctx, w, h) {
     this.lastCalledTime;
     this.netgraph = new Netgraph();
 
-    var g = this;
-    setInterval(function () {
-        g.mainLoop();
-    }, INTERVAL);
 }
 
 Game.prototype = {
 
-    init: function (wind, ships) {
+    init: function (wind, ships, roomId) {
+        this.roomId = roomId;
+        
         this.wind = wind;
         for (var i = 0; i < ships.length; i++) {
             if (!ships[i].image) {
@@ -43,6 +42,11 @@ Game.prototype = {
             }
             this.ships.push(ships[i]);
         }
+
+        var g = this;
+        setInterval(function () {
+            g.mainLoop();
+        }, INTERVAL);
     },
 
     mainLoop: function () {
@@ -53,9 +57,6 @@ Game.prototype = {
             this.sendData();
         }
         this.clearMap();
-        //TODO: Draw wind direciton, perhaps a nice opague arrow beneath playerShip
-        // If it becomes good, remove html arrow.
-        // Also draw circle around ship? "Wacraft3 selected unit"
         this.drawShips();
         this.drawProjectiles();
 
@@ -93,10 +94,10 @@ Game.prototype = {
 
             //Draw wind arrow udnder ship
             //that.ctx.rotate( Math.atan( that.wind[1]/ that.wind[0] ) );
-            var windAngle = Math.atan( that.wind[1]/ that.wind[0] );
+            var windAngle = Math.atan(that.wind[1] / that.wind[0]);
             that.ctx.beginPath();
             that.ctx.moveTo(ship.pos.x, ship.pos.y);
-            that.ctx.lineTo(ship.pos.x + (ship.image.width /2) * Math.sin(windAngle),ship.pos.y +  (ship.image.width /2)* Math.cos(windAngle));
+            that.ctx.lineTo(ship.pos.x + (ship.image.width / 2) * Math.sin(windAngle), ship.pos.y + (ship.image.width / 2) * Math.cos(windAngle));
             that.ctx.stroke();
             that.ctx.closePath();
 
@@ -104,7 +105,7 @@ Game.prototype = {
             that.ctx.save();
             that.ctx.translate(ship.pos.x, ship.pos.y);
             that.ctx.rotate(ship.angle);
-            
+
             that.ctx.drawImage(ship.image, ship.image.width / -2, ship.image.height / -2, ship.image.width, ship.image.height);
             that.ctx.restore();
 
@@ -129,8 +130,8 @@ Game.prototype = {
             that.ctx.stroke();
         });
     },
-    drawFeeds: function() {
-        this.feeds.forEach( function(feed){
+    drawFeeds: function () {
+        this.feeds.forEach(function (feed) {
             var kf = new Killfeed(feed.playerId, feed.targetId);
             kf.draw();
         });
@@ -188,21 +189,21 @@ Game.prototype = {
             }
         });
     },
-    requestAnimFrame: function() {
-        if(!this.lastCalledTime) {
+    requestAnimFrame: function () {
+        if (!this.lastCalledTime) {
             this.lastCalledTime = Date.now();
             return 0;
         }
-        var delta = (Date.now() - this.lastCalledTime)/1000;
+        var delta = (Date.now() - this.lastCalledTime) / 1000;
         this.lastCalledTime = Date.now();
-        return 1/delta;
+        return 1 / delta;
     },
-    serverResponseTime: function() {
-        if(! this.lastCalledTime_server) {
-             this.lastCalledTime_server = Date.now();
+    serverResponseTime: function () {
+        if (!this.lastCalledTime_server) {
+            this.lastCalledTime_server = Date.now();
             return 0;
         }
-        delta = (Date.now() -  this.lastCalledTime_server)/1000;
+        delta = (Date.now() - this.lastCalledTime_server) / 1000;
         this.lastCalledTime_server = Date.now();
         return delta;
     },
@@ -218,9 +219,10 @@ Game.prototype = {
             pos: this.playerShip.pos,
             angle: this.playerShip.angle,
             dir: this.playerShip.dir,
-            collision: this.playerShip.collision
+            collision: this.playerShip.collision,
         };
         gameData.ship = t;
+        gameData.roomId = this.roomId;
 
         //Client game does not send any info about projectiles,
         //the server controls that part
@@ -259,7 +261,7 @@ Game.prototype = {
 
         game.projectiles = serverData.projectiles;
 
-        serverData.killfeed.forEach( function(feed) {
+        serverData.killfeed.forEach(function (feed) {
             var kf = new Killfeed(feed.playerId, feed.targetId);
             kf.draw();
         });
@@ -267,14 +269,14 @@ Game.prototype = {
 }
 
 //TODO: put these classes in seperate files
-function Netgraph(){
+function Netgraph() {
     this.updateCD = 20;
     this.counter = 0;
 }
 
 Netgraph.prototype = {
-    update: function(fps, time) {
-        if(this.counter >= this.updateCD){
+    update: function (fps, time) {
+        if (this.counter >= this.updateCD) {
             this.drawFPS(fps);
             this.drawResponseTime(time);
             this.counter = 0;
@@ -284,12 +286,12 @@ Netgraph.prototype = {
     drawFPS: function (fps) {
         document.getElementById('fps').innerHTML = 'FPS: ' + Math.round(fps);
     },
-    drawResponseTime: function(time) {
+    drawResponseTime: function (time) {
         document.getElementById('time').innerHTML = 'Server response time: ' + time;
     }
 }
 
-function Scoreboard(){
+function Scoreboard() {
 
 }
 
@@ -324,7 +326,7 @@ Killfeed.prototype = {
     },
     //FIXME: Animation not working
     animation: function () {
-        if(!this.elem){
+        if (!this.elem) {
             this.elem = document.getElementById(this.elemId);
             return;
         }
@@ -332,7 +334,7 @@ Killfeed.prototype = {
         if (parseInt(this.elem.style.opacity) <= 0) {
             this.remove();
             clearInterval(this.intv);
-        }else{
+        } else {
             this.elem.style.opacity = parseInt(this.elem.style.opacity) - 0.01;
         }
     }
