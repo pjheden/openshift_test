@@ -17,7 +17,7 @@ function Ship(id, ctx, pos) {
     // this.image.height = this.image.height / 10;
     this.image.width = 64;
     this.image.height = 40;
-    this.speed = 2;
+    this.speed = 100;
 
     // this.pos.x = x;
     // this.pos.y = y;
@@ -30,7 +30,7 @@ function Ship(id, ctx, pos) {
     };
     this.rotateDir = 0;
     this.angle = 0.0;
-    this.deltaA = Math.PI / 100;
+    this.deltaA = Math.PI;
 
     this.collision = this.image.height / 2;
 
@@ -98,8 +98,8 @@ Ship.prototype = {
 
     },
 
-    rotate: function() {
-        this.angle += this.rotateDir * this.deltaA;
+    rotate: function(deltaTime) {
+        this.angle += this.rotateDir * this.deltaA * deltaTime;
         if (this.angle > Math.PI * 2) {
             this.angle -= this.rotateDir * Math.PI * 2;
         }
@@ -109,7 +109,7 @@ Ship.prototype = {
         this.dir = normalize(this.dir.x, this.dir.y);
     },
 
-    move: function(wind) {
+    move: function(wind, deltaTime) {
         if (this.dead) return;
         //Wind calculations
         var windDirection = normalize(wind[0], wind[1]);
@@ -119,13 +119,15 @@ Ship.prototype = {
 
         var moveX = (this.speed * this.dir.x) + (wSpeed * this.dir.x);
         var moveY = (this.speed * this.dir.y) + (wSpeed * this.dir.y);
+        var newX = this.pos.x + moveX * deltaTime;
+        var newY = this.pos.y + moveY * deltaTime;
 
         //boundary control
-        if (this.pos.x + moveX > (0 + this.image.width / 2) && (this.pos.x + moveX) < (WIDTH - this.image.width / 2)) {
-            this.pos.x += moveX;
+        if (newX > (0 + this.image.width / 2) && (newX) < (WIDTH - this.image.width / 2)) {
+            this.pos.x = newX;
         }
-        if (this.pos.y + moveY > (0 + this.image.height / 2) && (this.pos.y + moveY) < (HEIGHT - this.image.height / 2)) {
-            this.pos.y += moveY;
+        if (newY > (0 + this.image.height / 2) && (newY) < (HEIGHT - this.image.height / 2)) {
+            this.pos.y = newY;
         }
     },
 

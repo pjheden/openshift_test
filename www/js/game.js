@@ -52,10 +52,11 @@ Game.prototype = {
     mainLoop: function () {
         console.log('mainloop');
         
-        this.updateAllObjects();
-        if (this.playerShip) {
-            this.playerShip.rotate();
-            this.playerShip.move(this.wind);
+        var delta = (Date.now() - this.lastCalledTime) / 1000;
+        this.updateAllObjects(delta);
+        if (this.playerShip) { //TODO: Make ship movement undependent on fps, right now the hsip jumps forward sometimes because fps changes with correlates to speed of ship
+            this.playerShip.rotate(delta);
+            this.playerShip.move(this.wind, delta);
             this.sendData();
         }
         this.clearMap();
@@ -140,12 +141,12 @@ Game.prototype = {
         });
         this.feeds = [];
     },
-    updateAllObjects: function () {
+    updateAllObjects: function (deltaTime) {
         //Wind calculations
         var windDirection = normalize(this.wind[0], this.wind[1]);
         var windMagnitude = lengthVec(this.wind[0], this.wind[1]);
 
-        this.updateShips(windDirection, windMagnitude);
+        this.updateShips(windDirection, windMagnitude, deltaTime);
         this.updateProjectiles(windDirection, windMagnitude);
     },
     /**
@@ -171,7 +172,7 @@ Game.prototype = {
     /**
      * Make a guess of the ships moevments and update them locally
      */
-    updateShips: function (windDirection, windMagnitude) {
+    updateShips: function (windDirection, windMagnitude, deltaTime) {
         var that = this;
         this.ships.forEach(function (ship) {
             if (!that.playerShip || ship.id !== that.playerShip.id) {
@@ -181,13 +182,15 @@ Game.prototype = {
                 var wSpeed = windMagnitude * cosOfAngle;
                 var moveX = (ship.speed * ship.dir.x) + (wSpeed * ship.dir.x);
                 var moveY = (ship.speed * ship.dir.y) + (wSpeed * ship.dir.y);
+                var newX = ship.pos.x + moveX * deltaTime;
+                var newY = ship.pos.y + moveY * deltaTime;
 
                 //boundary control
-                if (ship.pos.x + moveX > (0 + ship.image.width / 2) && (ship.pos.x + moveX) < (WIDTH - ship.image.width / 2)) {
-                    ship.pos.x += moveX;
+                if (newX > (0 + ship.image.width / 2) && (newX) < (WIDTH - ship.image.width / 2)) {
+                    ship.pos.x = newX;
                 }
-                if (ship.pos.y + moveY > (0 + ship.image.height / 2) && (ship.pos.y + moveY) < (HEIGHT - ship.image.height / 2)) {
-                    ship.pos.y += moveY;
+                if (newY > (0 + ship.image.height / 2) && (newY) < (HEIGHT - ship.image.height / 2)) {
+                    ship.pos.y = newY;
                 }
             }
         });
