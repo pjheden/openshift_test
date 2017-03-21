@@ -71,6 +71,7 @@ module.exports = function GameServer(roomId) {
 						ship.dead = true;
 						proj.dead = true;
 						that.killfeed.push({
+							feedId: 'feed' + that.projs_created,
 							playerId: proj.ownerId,
 							targetId: ship.id
 						});

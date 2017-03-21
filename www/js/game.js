@@ -13,7 +13,8 @@ function Game(socket, ctx, w, h) {
 
     this.ships = [];
     this.projectiles = [];
-    this.feeds = [];
+    // this.feeds = [];
+    this.oldFeeds = [];
     this.playerShip;
 
     this.wind = [1, 1];
@@ -135,13 +136,13 @@ Game.prototype = {
             that.ctx.stroke();
         });
     },
-    drawFeeds: function () {
-        this.feeds.forEach(function (feed) {
-            var kf = new Killfeed(feed.playerId, feed.targetId);
-            kf.draw();
-        });
-        this.feeds = [];
-    },
+    // drawFeeds: function () {
+    //     this.feeds.forEach(function (feed) {
+    //         var kf = new Killfeed(feed.playerId, feed.targetId);
+    //         kf.draw();
+    //     });
+    //     this.feeds = [];
+    // },
     updateAllObjects: function (deltaTime) {
         //Wind calculations
         var windDirection = normalize(this.wind[0], this.wind[1]);
@@ -269,8 +270,11 @@ Game.prototype = {
         game.projectiles = serverData.projectiles;
 
         serverData.killfeed.forEach(function (feed) {
-            var kf = new Killfeed(feed.playerId, feed.targetId);
-            kf.draw();
+            if(!inArray(feed.feedId, game.oldFeeds)){
+                game.oldFeeds.push(feed.feedId);
+                var kf = new Killfeed(feed.feedId, feed.playerId, feed.targetId);
+                kf.draw();
+            }
         });
     }
 }
@@ -303,47 +307,5 @@ function Scoreboard() {
 }
 
 Scoreboard.prototype = {
-
-};
-
-//FIXME: Seems like only some players gets a feed
-function Killfeed(playerId, targetId) {
-    this.playerId = playerId;
-    this.targetId = targetId;
-    this.elemId = playerId + targetId;
-    this.elem;
-
-    this.intv;
-    this.intvT = 1000;
-}
-
-Killfeed.prototype = {
-    draw: function () {
-        var str = '<div style="opacity:0.8;" id = ' + this.elemId + '>';
-        str += '<span style="color:#80ff80;">' + this.playerId + '</span>';
-        str += '<span class="circle"></span>';
-        str += '<span style="color:#80d0d0;"> ' + this.targetId + '</span>';
-        str += '<br></div>';
-        document.getElementsByClassName('killfeed')[0].innerHTML += str;
-
-        this.intv = setInterval(this.animation, this.intvT);
-    },
-    remove: function () {
-        this.elem.parentNode.removeChild(this.elem);
-    },
-    //FIXME: Animation not working
-    animation: function () {
-        if (!this.elem) {
-            this.elem = document.getElementById(this.elemId);
-            return;
-        }
-
-        if (parseInt(this.elem.style.opacity) <= 0) {
-            this.remove();
-            clearInterval(this.intv);
-        } else {
-            this.elem.style.opacity = parseInt(this.elem.style.opacity) - 0.01;
-        }
-    }
 
 };

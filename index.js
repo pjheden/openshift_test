@@ -136,7 +136,6 @@ io.on('connection', function (client) {
 
         game.detectCollision();
 
-
         //Broadcast data to clients
         client.to(data.roomId).emit('serverSync', game.getData());
         // client.broadcast.emit('serverSync', game.getData());
@@ -149,7 +148,7 @@ io.on('connection', function (client) {
             if (proj.dead) game.removeProjectile(proj.id);
         });
 
-        game.clearFeed();
+        //game.clearFeed(); //I solved this in Killfeed class instead, by only drawing undrawn feeds
     });
 
 });
