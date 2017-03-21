@@ -1,4 +1,4 @@
-var INTERVAL = 30;
+var INTERVAL = 20;
 var WIDTH;
 var HEIGHT;
 
@@ -30,8 +30,8 @@ Game.prototype = {
 
     init: function (wind, ships, roomId) {
         this.roomId = roomId;
-        
         this.wind = wind;
+
         for (var i = 0; i < ships.length; i++) {
             if (!ships[i].image) {
                 var src = './images/ships/ship_pattern0.png';
@@ -50,6 +50,8 @@ Game.prototype = {
     },
 
     mainLoop: function () {
+        console.log('mainloop');
+        
         this.updateAllObjects();
         if (this.playerShip) {
             this.playerShip.rotate();
@@ -72,6 +74,7 @@ Game.prototype = {
             t.setControls();
             t.setSocket(this.socket);
         }
+        return t;
     },
 
     removeShip: function (shipId) {

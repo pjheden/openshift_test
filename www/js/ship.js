@@ -13,8 +13,10 @@ function Ship(id, ctx, pos) {
     var src = './images/ships/ship_pattern0.png';
     this.image = new Image();
     this.image.src = src;
-    this.image.width = this.image.width / 10;
-    this.image.height = this.image.height / 10;
+    // this.image.width = this.image.width / 10;
+    // this.image.height = this.image.height / 10;
+    this.image.width = 64;
+    this.image.height = 40;
     this.speed = 2;
 
     // this.pos.x = x;
@@ -32,17 +34,17 @@ function Ship(id, ctx, pos) {
 
     this.collision = this.image.height / 2;
 
-    this.draw();
+    //this.draw();
 }
 
 Ship.prototype = {
-    draw: function() {
-        this.ctx.save();
-        this.ctx.translate(this.pos.x, this.pos.y);
-        this.ctx.rotate(this.angle);
-        this.ctx.drawImage(this.image, this.image.width / -2, this.image.height / -2, this.image.width, this.image.height);
-        this.ctx.restore();
-    },
+    // draw: function() {
+    //     this.ctx.save();
+    //     this.ctx.translate(this.pos.x, this.pos.y);
+    //     this.ctx.rotate(this.angle);
+    //     this.ctx.drawImage(this.image, this.image.width / -2, this.image.height / -2, this.image.width, this.image.height);
+    //     this.ctx.restore();
+    // },
 
     /**
      * Stores the socket in a variable so the player can emit in shoot()

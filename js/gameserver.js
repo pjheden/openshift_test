@@ -93,6 +93,12 @@ module.exports = function GameServer(roomId) {
 					x: initX,
 					y: initY
 				},
+				angle: 0.0,
+				dir: {
+					x: 0,
+					y: 0
+				},
+				collision: 0,
 				isPlayer: true
 			};
 		}
