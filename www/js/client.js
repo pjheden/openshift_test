@@ -1,5 +1,5 @@
-//var socket = io.connect('https://last-ship-standing-mp.herokuapp.com/');
-var socket = io.connect('http://localhost:8082');
+var socket = io.connect('https://last-ship-standing-mp.herokuapp.com/');
+//var socket = io.connect('http://localhost:8082');
 
 // -------------- General -----------------
 
