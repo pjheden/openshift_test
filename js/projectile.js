@@ -1,39 +1,39 @@
 //projectile.js
-module.exports = {
+module.exports = function Projectile(id, ownerId, pos, angle, tools) {
 	/**
 	 * Set initial variables for the projectile
 	 */
-	init: function (angle) {
-        // FIXME: Ball need to move slower and be less effected by wind
-        this.id = id;
-        this.ball_speed = 10;
-        this.r = 7;
+	// FIXME: Ball need to move slower and be less effected by wind
+	this.id = id;
+	this.ball_speed = 200;
+	this.r = 7;
 
-        this.wind_factor = 0.1;
-        this.steps = 0;
-        this.max_steps = 100;
+	this.wind_factor = 1.5;
+	this.steps = 0;
+	this.max_steps = 100;
 
-        this.pos = {
-            x: pos.x,
-            y: pos.y
-        };
-        this.ownerId = ownerId;
-        this.dead = false;
-        this.speed = {
-            x: this.ball_speed * Math.sin(angle),
-            y: -this.ball_speed * Math.cos(angle)
-        };
-	},
+	this.pos = {
+		x: pos.x,
+		y: pos.y
+	};
+	this.ownerId = ownerId;
+	this.dead = false;
+	this.speed = {
+		x: this.ball_speed * Math.sin(angle),
+		y: -this.ball_speed * Math.cos(angle)
+	};
 
-	move: function (wind) {
+	this.tools = tools;
+
+	this.move = function (wind, deltaTime) {
 		if (this.steps >= this.max_steps) { //FIXME: Change from number of steps to out of boundary
 			this.dead = true;
 			return;
 		}
 
 		//Wind calculations
-		var windDirection = normalize(wind[0], wind[1]);
-		var windMagnitude = lengthVec(wind[0], wind[1]);
+		var windDirection = this.tools.normalize(wind[0], wind[1]);
+		var windMagnitude = this.tools.lengthVec(wind[0], wind[1]);
 
 		//Update projectile position
 		var wSpeed = {
@@ -43,11 +43,11 @@ module.exports = {
 
 		this.speed.x += wSpeed.x * this.wind_factor;
 		this.speed.y += wSpeed.y * this.wind_factor;
-		this.pos.x += this.speed.x;
-		this.pos.y += this.speed.y;
+		this.pos.x += this.speed.x * deltaTime;
+		this.pos.y += this.speed.y * deltaTime;
 
 		this.steps += 1;
-	}
+	};
 };
 
 

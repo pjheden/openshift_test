@@ -3,7 +3,7 @@ var app = express();
 
 var Gameserver = require('./js/gameserver.js');
 var lobbyserver = require('./js/lobbyserver.js');
-// var projectile = require('./js/projectile.js');
+var Projectile = require('./js/projectile.js');
 // var scoreboard = require('./js/scoreboard.js');
 var tools = require('./js/tools.js');
 
@@ -113,6 +113,14 @@ io.on('connection', function (client) {
         });
     });
 
+//TODO:
+    client.on('shoot', function (proj) {
+        var game = lobbyserver.rooms[proj.roomId].gameserver;
+		var projectile = new Projectile('proj' + game.projs_created, proj.ownerId, proj.pos, proj.angle, tools);
+		game.addProjectile(projectile);
+		game.projs_created++;
+	});
+
     client.on('clientSync', function (data) {
         //TODO: Ships aren't added to the game, look at index_old.js
 
@@ -141,7 +149,7 @@ io.on('connection', function (client) {
             if (proj.dead) game.removeProjectile(proj.id);
         });
 
-        //this.clearFeed();
+        game.clearFeed();
     });
 
 });

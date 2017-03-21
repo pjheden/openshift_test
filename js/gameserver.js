@@ -47,9 +47,14 @@ module.exports = function GameServer(roomId) {
 		});
 	};
 	this.updateProjectiles = function () {
+		if(!this.lastCalledTime){
+			this.lastCalledTime = Date.now();
+		}
+		var deltaTime = (Date.now() - this.lastCalledTime) / 1000;
+		this.lastCalledTime = Date.now();
 		var that = this;
 		this.projectiles.forEach(function (proj) {
-			proj.move(that.wind);
+			proj.move(that.wind, deltaTime);
 		});
 	};
 	//FIXME: The hitbox seems to be quite off.

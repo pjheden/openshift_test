@@ -141,7 +141,8 @@ Ship.prototype = {
       var projectile = {
           ownerId: this.id,
           pos: this.pos,
-          angle: this.angle
+          angle: this.angle,
+          roomId: this.roomId
       };
       this.socket.emit('shoot', projectile);
     }

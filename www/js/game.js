@@ -72,8 +72,9 @@ Game.prototype = {
         this.ships.push(t);
         if (isPlayer) {
             this.playerShip = t;
-            t.setControls();
-            t.setSocket(this.socket);
+            this.playerShip.roomId = this.roomId;
+            this.playerShip.setControls();
+            this.playerShip.setSocket(this.socket);
         }
         return t;
     },
@@ -147,14 +148,14 @@ Game.prototype = {
         var windMagnitude = lengthVec(this.wind[0], this.wind[1]);
 
         this.updateShips(windDirection, windMagnitude, deltaTime);
-        this.updateProjectiles(windDirection, windMagnitude);
+        this.updateProjectiles(windDirection, windMagnitude, deltaTime);
     },
     /**
      * Update the movement of the projectiles locally to reduce lag
      * @param {Vector} windDirection - direction of the wind 2D
      * @param {Double} windMagnitude - Magnitude of the wind
      */
-    updateProjectiles: function (windDirection, windMagnitude) {
+    updateProjectiles: function (windDirection, windMagnitude, deltaTime) {
         var that = this;
         this.projectiles.forEach(function (proj) {
             //Update projectile position
@@ -164,8 +165,8 @@ Game.prototype = {
             };
             proj.speed.x += wSpeed.x;
             proj.speed.y += wSpeed.y;
-            proj.pos.x += proj.speed.x;
-            proj.pos.y += proj.speed.y;
+            proj.pos.x += proj.speed.x * deltaTime;
+            proj.pos.y += proj.speed.y * deltaTime;
         });
 
     },
