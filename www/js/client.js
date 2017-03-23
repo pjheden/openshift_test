@@ -22,9 +22,14 @@ socket.on('error', function () {
 });
 
 var canvas = $('#arena');
+canvas[0].style.background = ' url("./images/laguna.png")';
+canvas[0].style.backgroundSize = 'cover';
 var ctx = canvas[0].getContext('2d');
 ctx.canvas.width = window.innerWidth;
 ctx.canvas.height = window.innerHeight;
+
+$('#projectiles').width(window.innerWidth);
+$('#projectiles').height(window.innerHeight);
 
 
 $(document).ready(function () {

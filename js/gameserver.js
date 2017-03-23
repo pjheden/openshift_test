@@ -9,6 +9,7 @@ module.exports = function GameServer(roomId) {
 	that.ships = [];
 	that.projectiles = [];
 	that.killfeed = [];
+	that.projfeed = [];
 	that.wind = [1, 1];
 
 	/*that.scoreboard = new Scoreboard();*/
@@ -86,6 +87,7 @@ module.exports = function GameServer(roomId) {
 			ships: this.ships,
 			projectiles: this.projectiles,
 			killfeed: this.killfeed,
+			projfeed: this.projfeed,
 			wind: this.wind,
 			roomId: this.roomId
 		};

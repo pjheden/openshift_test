@@ -1,15 +1,25 @@
 ----What to do----
+-Game-
+Add countdown before match
+Add wind on top
+    -Remove ring and wind direction under boat
+    -Should be a div to reduce redrawing, called every time wind change
+Set spawn on each side
+Set a fix canvas size
+Add a reload timer
+Remove elemens from clientgame.oldFeed once they are deleted
+Remove watersplash after some time
 
-Add visual borders, laguna?
+-Lobby-
+Move leaderboard to lobby
+Change lobby to drawing in deekit
 
 Functional leaderboard
     -Serverside in ram? So is it who's the best right now, or is it history based?
-Check if killfeed has a bug still
-    -Only shows on some screens
+    
 Add rocks
     -Blocks projectiles
     -Kills ship on contact
     -Breakable by shooting or so?
-Splash animation for projectile
 Ship death animation
 Go through all FIXME: and TODO:

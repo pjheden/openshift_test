@@ -1,5 +1,5 @@
 //projectile.js
-module.exports = function Projectile(id, ownerId, pos, angle, tools) {
+module.exports = function Projectile(id, ownerId, pos, angle, tools, isLeft) {
 	/**
 	 * Set initial variables for the projectile
 	 */
@@ -10,7 +10,7 @@ module.exports = function Projectile(id, ownerId, pos, angle, tools) {
 
 	this.wind_factor = 1.5;
 	this.steps = 0;
-	this.max_steps = 100;
+	this.max_steps = 130;
 
 	this.pos = {
 		x: pos.x,
@@ -19,8 +19,8 @@ module.exports = function Projectile(id, ownerId, pos, angle, tools) {
 	this.ownerId = ownerId;
 	this.dead = false;
 	this.speed = {
-		x: this.ball_speed * Math.sin(angle),
-		y: -this.ball_speed * Math.cos(angle)
+		x: this.ball_speed * Math.sin(angle) * isLeft,
+		y: -this.ball_speed * Math.cos(angle) * isLeft
 	};
 
 	this.tools = tools;
@@ -48,6 +48,14 @@ module.exports = function Projectile(id, ownerId, pos, angle, tools) {
 
 		this.steps += 1;
 	};
+
+	this.animateDeath = function(){
+		//Add a html img of splah and remove it after some time
+		str = '<img id="'+this.id+'img" src="./images/splash.png" alt="splash"';
+		str += 'style="position:fixed; left:'+parseInt(this.pos.x)+'px; top:'+parseInt(this.pos.y)+'px;"'
+		str += '>';
+		return {elem: str, id: this.id };
+	}
 };
 
 

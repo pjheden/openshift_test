@@ -269,6 +269,13 @@ Game.prototype = {
 
         game.projectiles = serverData.projectiles;
 
+        serverData.projfeed.forEach( function( feed ){
+            if(!inArray(feed.id, game.oldFeeds)){
+                game.oldFeeds.push(feed.id);
+                document.getElementsByClassName('projectiles')[0].innerHTML += feed.elem;
+            }
+        });
+
         serverData.killfeed.forEach(function (feed) {
             if(!inArray(feed.feedId, game.oldFeeds)){
                 game.oldFeeds.push(feed.feedId);

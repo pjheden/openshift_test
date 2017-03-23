@@ -116,15 +116,15 @@ io.on('connection', function (client) {
 //TODO:
     client.on('shoot', function (proj) {
         var game = lobbyserver.rooms[proj.roomId].gameserver;
-		var projectile = new Projectile('proj' + game.projs_created, proj.ownerId, proj.pos, proj.angle, tools);
+		var projectile = new Projectile('proj' + game.projs_created, proj.ownerId, proj.pos, proj.angle, tools, 1);
+		game.addProjectile(projectile);
+		game.projs_created++;
+        var projectile = new Projectile('proj' + game.projs_created, proj.ownerId, proj.pos, proj.angle, tools, -1);
 		game.addProjectile(projectile);
 		game.projs_created++;
 	});
 
     client.on('clientSync', function (data) {
-        //TODO: Ships aren't added to the game, look at index_old.js
-
-
         if (!lobbyserver.rooms[data.roomId]) return;
         var game = lobbyserver.rooms[data.roomId].gameserver;
         //Update projectiles FIXME: this is what Tanks github did, but seems like a horrible system? balls will go faster per client right?
@@ -137,15 +137,17 @@ io.on('connection', function (client) {
         game.detectCollision();
 
         //Broadcast data to clients
-        client.to(data.roomId).emit('serverSync', game.getData());
-        // client.broadcast.emit('serverSync', game.getData());
+        client.in(data.roomId).emit('serverSync', game.getData());
 
         //Remove all dead ships and projectiles
-        game.ships.forEach(function (ship) {
-            if (ship.dead) game.removeShip(ship.id);
-        });
+        // game.ships.forEach(function (ship) {
+        //     if (ship.dead) game.removeShip(ship.id);
+        // });
         game.projectiles.forEach(function (proj) {
-            if (proj.dead) game.removeProjectile(proj.id);
+            if (proj.dead){
+                game.projfeed.push(proj.animateDeath());
+                game.removeProjectile(proj.id);
+            }
         });
 
         //game.clearFeed(); //I solved this in Killfeed class instead, by only drawing undrawn feeds
