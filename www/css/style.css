@@ -1,9 +1,10 @@
-html, body {
-  width:  100%;
+html,
+body {
+  width: 100%;
   height: 100%;
   margin: 0px;
   padding: 0px;
-  overflow:hidden;
+  overflow: hidden;
 }
 
 canvas {
@@ -11,25 +12,10 @@ canvas {
   background-size: cover;
 }
 
-
 .scoreboard {
-    position: fixed;
-    top:32px;
-    right:64px;
-    text-align: left;
-    white-space: nowrap;
-    font-size: 12px;
-    overflow: hidden;
-    z-index: 8;
-    display: inline;
-    cursor: default;
-    line-height: 150%;
-}
-
-.killfeed {
   position: fixed;
-  top:32px;
-  left:32px;
+  top: 32px;
+  right: 64px;
   text-align: left;
   white-space: nowrap;
   font-size: 12px;
@@ -40,6 +26,26 @@ canvas {
   line-height: 150%;
 }
 
+.killfeed {
+  position: fixed;
+  top: 32px;
+  left: 32px;
+  text-align: left;
+  white-space: nowrap;
+  font-size: 12px;
+  overflow: hidden;
+  z-index: 8;
+  display: inline;
+  cursor: default;
+  line-height: 150%;
+}
+
+time {
+  position: fixed;
+  bottom: 50%;
+  right: 50%;
+}
+
 .circle:before {
   content: ' \25CF';
   font-size: 14px;
@@ -47,8 +53,8 @@ canvas {
 
 .netgraph {
   position: fixed;
-  bottom:32px;
-  left:32px;
+  bottom: 32px;
+  left: 32px;
   text-align: left;
   white-space: nowrap;
   font-size: 12px;
@@ -61,39 +67,39 @@ canvas {
 
 .join_section {
   position: fixed;
-  top:47.5%;
-  left:42.5%;
-  padding:1em;
-  border:none;
-  border-radius:1em;
+  top: 47.5%;
+  left: 42.5%;
+  padding: 1em;
+  border: none;
+  border-radius: 1em;
   background-color: gray;
-
-  text-decoration:none;
-  text-align:center;
+  text-decoration: none;
+  text-align: center;
 }
 
 #join_button {
-  width:5em; /* setting the width */
-  height:5em;
-  font-style:normal;
-  font-weight:normal;
-  font-family:"Open Sans";
-  font-size:14px;
-  outline:none;
-  color:#fff;
-  border:none;
-  text-decoration:none;
-  text-align:center;
-  cursor:pointer;
-  border-radius:2px;
-  background-color:#96aa39;
-  border-bottom:1px solid #7b8b2f;
+  width: 5em;
+  /* setting the width */
+  height: 5em;
+  font-style: normal;
+  font-weight: normal;
+  font-family: "Open Sans";
+  font-size: 14px;
+  outline: none;
+  color: #fff;
+  border: none;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+  border-radius: 2px;
+  background-color: #96aa39;
+  border-bottom: 1px solid #7b8b2f;
 }
 
 .lobby {
   position: fixed;
-  top:20%;
-  left:30%;
+  top: 20%;
+  left: 30%;
   text-align: left;
   white-space: nowrap;
   font-size: 12px;
@@ -110,10 +116,9 @@ canvas {
   height: 100px;
   border: solid #000;
   border-radius: 4px;
-  
 }
 
 .lobbyelement h3 {
   text-align: center;
-    color: #fff;
+  color: #fff;
 }

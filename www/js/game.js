@@ -45,8 +45,11 @@ Game.prototype = {
         }
 
         var g = this;
+        var timer = new Timer();
         setInterval(function () {
-            g.mainLoop();
+            if(timer.finished){
+                g.mainLoop();
+            }
         }, INTERVAL);
     },
 
