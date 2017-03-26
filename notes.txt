@@ -1,12 +1,16 @@
 ----What to do----
 -Game-
-Set spawn on each side
-Return to lobby on player victory
+Don't exit the game instantly, show winner and wait a few seconds
+Sometimes boats doesnt spawn with the right angle
+Remove watersplash on gameend
 
 Set a fix canvas size
 Remove elemens from clientgame.oldFeed once they are deleted
 Remove watersplash after some time
 Add visuals for reload time
+Change to best of 3
+
+Instead of disabling and enabling buttons i should have different classes in css i swap between
 
 -Lobby-
 Move leaderboard to lobby

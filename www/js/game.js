@@ -6,7 +6,6 @@ function Game(socket, ctx, w, h) {
     console.log('Game constructor');
     this.socket = socket;
     this.ctx = ctx;
-    this.roomId;
 
     WIDTH = w;
     HEIGHT = h;
@@ -14,6 +13,7 @@ function Game(socket, ctx, w, h) {
     this.spawns = [{x: w/10, y: h / 2}, {x: w-w/10, y: h/2}];
     this.angles = [0.0, Math.PI];
 
+    this.roomId;
     this.ships = [];
     this.projectiles = [];
     // this.feeds = [];
@@ -27,7 +27,7 @@ function Game(socket, ctx, w, h) {
     this.fps;
     this.lastCalledTime;
     this.netgraph = new Netgraph();
-    this.windcompass = new WindCompass()
+    this.windcompass = new WindCompass();
 
 }
 
@@ -50,11 +50,49 @@ Game.prototype = {
 
         var g = this;
         var timer = new Timer();
-        setInterval(function () {
+        this.mainInterval = setInterval(function () {
             if(timer.finished){
                 g.mainLoop();
             }
         }, INTERVAL);
+    },
+
+    reset: function() {
+        clearInterval(this.mainInterval);
+
+        delete this.fps;
+        delete this.lastCalledTime;
+        delete this.lastCalledTime_server;
+        delete this.mainInterval;
+        delete this.name;
+        delete this.playerShip;
+        delete this.serverups;
+        delete this.spawnPos;
+        delete this.team;
+        $(document).off("keypress");
+
+        //Remove all watersplashes
+        var node = document.getElementsByClassName('projectiles')[0];
+        while (node.hasChildNodes()) {
+            node.removeChild(node.lastChild);
+        }
+
+        this.roomId;
+        this.ships = [];
+        this.projectiles = [];
+        // this.feeds = [];
+        this.oldFeeds = [];
+        this.playerShip;
+
+        this.wind = [1, 1];
+
+        this.serverups;
+        this.lastCalledTime_server;
+        this.fps;
+        this.lastCalledTime;
+
+
+        this.clearMap();
     },
 
     mainLoop: function () {
@@ -62,7 +100,7 @@ Game.prototype = {
         
         var delta = (Date.now() - this.lastCalledTime) / 1000;
         this.updateAllObjects(delta);
-        if (this.playerShip) { //TODO: Make ship movement undependent on fps, right now the hsip jumps forward sometimes because fps changes with correlates to speed of ship
+        if (this.playerShip) {
             this.playerShip.rotate(delta);
             this.playerShip.move(this.wind, delta);
             this.sendData();
@@ -151,6 +189,7 @@ Game.prototype = {
     //     this.feeds = [];
     // },
     updateAllObjects: function (deltaTime) {
+        
         //Wind calculations
         var windDirection = normalize(this.wind[0], this.wind[1]);
         var windMagnitude = lengthVec(this.wind[0], this.wind[1]);
@@ -182,6 +221,7 @@ Game.prototype = {
      * Make a guess of the ships moevments and update them locally
      */
     updateShips: function (windDirection, windMagnitude, deltaTime) {
+        
         var that = this;
         this.ships.forEach(function (ship) {
             if (!that.playerShip || ship.id !== that.playerShip.id) {
@@ -235,6 +275,7 @@ Game.prototype = {
             angle: this.playerShip.angle,
             dir: this.playerShip.dir,
             collision: this.playerShip.collision,
+            team: this.team
         };
         gameData.ship = t;
         gameData.roomId = this.roomId;

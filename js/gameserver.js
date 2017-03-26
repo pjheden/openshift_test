@@ -12,6 +12,9 @@ module.exports = function GameServer(roomId) {
 	that.projfeed = [];
 	that.wind = [1, 1];
 
+	that.teamsize = 1;
+	that.teams = [0, 0];
+
 	/*that.scoreboard = new Scoreboard();*/
 
 	var wind_interval = 5000;
@@ -36,6 +39,7 @@ module.exports = function GameServer(roomId) {
 				this.ships[i].angle = ship.angle;
 				this.ships[i].dir = ship.dir;
 				this.ships[i].collision = ship.collision;
+				this.ships[i].team = ship.team;
 			}
 		}
 	};
@@ -48,7 +52,7 @@ module.exports = function GameServer(roomId) {
 		});
 	};
 	this.updateProjectiles = function () {
-		if(!this.lastCalledTime){
+		if (!this.lastCalledTime) {
 			this.lastCalledTime = Date.now();
 		}
 		var deltaTime = (Date.now() - this.lastCalledTime) / 1000;
@@ -76,11 +80,26 @@ module.exports = function GameServer(roomId) {
 							playerId: proj.ownerId,
 							targetId: ship.id
 						});
+						if (ship.team == 'team0') {
+							that.teams[0] += 1;
+						} else {
+							that.teams[1] += 1;
+						}
 					}
 				});
 			}
 		});
 	};
+
+	this.checkWinner = function () {
+		for(var i = 0; i < this.teams.length; i ++){
+			if(this.teams[i] >= this.teamsize){
+				return i;
+			}
+		}
+		return -1;
+	};
+
 	this.getData = function (isInitial) {
 
 		var t = {

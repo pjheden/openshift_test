@@ -70,20 +70,34 @@ io.on('connection', function (client) {
             gameserver: new Gameserver(roomId)
         };
 
-        client.emit('joinRoom', roomId, 0); //TODO: give player number here for position
-        client.to(lobbyserver.getSocketId(challenge.challenger)).emit('joinRoom', roomId, 1);
+        
+
+        client.emit('joinRoom', roomId, 0, 'team0'); //TODO: give player number here for position
+        client.to(lobbyserver.getSocketId(challenge.challenger)).emit('joinRoom', roomId, 1, 'team1');
     });
 
     client.on('joinRoom', function (roomId) {
         var room = lobbyserver.rooms[roomId];
         room.nrOfPlayers += 1;
         client.join(roomId);
+        console.log('client joined', roomId);
+        
 
         if (room.nrOfPlayers == room.playersExpected) {
             var gData = room.gameserver.getData(true);
             gData.ship.id = client.playerId;
             io.to(roomId).emit('initGame', gData);
 
+        }
+    });
+
+    client.on('leaveRoom', function (roomId) {
+        client.leave(roomId);
+        var room = lobbyserver.rooms[roomId];
+        room.nrOfPlayers -= 1;
+
+        if (room.nrOfPlayers == 0) {
+            delete lobbyserver.rooms[roomId];
         }
     });
 
@@ -109,6 +123,7 @@ io.on('connection', function (client) {
     });
 
     client.on('shoot', function (proj) {
+        
         var game = lobbyserver.rooms[proj.roomId].gameserver;
 		var projectile = new Projectile('proj' + game.projs_created, proj.ownerId, proj.pos, proj.angle, tools, 1);
 		game.addProjectile(projectile);
@@ -123,6 +138,10 @@ io.on('connection', function (client) {
         var game = lobbyserver.rooms[data.roomId].gameserver;
 
         game.updateProjectiles();
+        var winner = game.checkWinner();
+        if(winner != -1){
+            client.emit('leaveRoom', winner, data.roomId);
+        }
         //Receive data from clients
         game.updateShip(data.ship);
 

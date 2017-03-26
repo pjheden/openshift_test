@@ -6,7 +6,7 @@
  * @param {integer} y - The y coordinate of the ship
  */
 function Ship(id, ctx, pos, angle=0.0) {
-  console.log('Ship constructor');
+    console.log('Ship constructor', id);
     this.id = id;
     this.dead = false;
     this.ctx = ctx;
@@ -141,7 +141,7 @@ Ship.prototype = {
     shoot: function() {
       if (this.dead || !this.socket) return;
       if(Date.now() - this.lastShot < this.reloadTime) return;
-
+      
       var projectile = {
           ownerId: this.id,
           pos: this.pos,

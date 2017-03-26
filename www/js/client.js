@@ -120,10 +120,19 @@ socket.on('challenge', function (ch) {
   lobby.challenged(ch.challengerId, ch.message);
 });
 
-socket.on('joinRoom', function (roomId, spawnPos) {
+socket.on('joinRoom', function (roomId, spawnPos, team) {
   document.getElementsByClassName('lobby')[0].style.visibility = 'hidden';
   game.roomId = roomId;
   game.spawnPos = spawnPos;
-  //TODO: Start the game
+  game.team = team;
+
   socket.emit('joinRoom', roomId);
+});
+
+socket.on('leaveRoom', function (winner, roomId) {
+  document.getElementsByClassName('lobby')[0].style.visibility = 'visible';
+  console.log('leaveroom, winner is', 'team' + winner);
+  game.reset();
+  
+  socket.emit('leaveRoom', roomId);
 });
