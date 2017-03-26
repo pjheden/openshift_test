@@ -5,7 +5,7 @@
  * @param {integer} x - The x coordinate of the ship
  * @param {integer} y - The y coordinate of the ship
  */
-function Ship(id, ctx, pos) {
+function Ship(id, ctx, pos, angle=0.0) {
   console.log('Ship constructor');
     this.id = id;
     this.dead = false;
@@ -29,7 +29,7 @@ function Ship(id, ctx, pos) {
         y: 0
     };
     this.rotateDir = 0;
-    this.angle = 0.0;
+    this.angle = angle;
     this.deltaA = Math.PI;
 
     this.collision = this.image.height / 2;

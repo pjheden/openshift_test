@@ -63,10 +63,6 @@ io.on('connection', function (client) {
     });
 
     client.on('acceptChallenge', function (challenge) {
-        // Then in joinRoom, we can check if players == playersExpected
-        // Then start a countdown to begin the game
-        // Need a gameserver per room?
-
         var roomId = tools.makeId(6);
         lobbyserver.rooms[roomId] = {
             playersExpected: challenge.nrOfPlayers,
@@ -74,8 +70,8 @@ io.on('connection', function (client) {
             gameserver: new Gameserver(roomId)
         };
 
-        client.emit('joinRoom', roomId);
-        client.to(lobbyserver.getSocketId(challenge.challenger)).emit('joinRoom', roomId);
+        client.emit('joinRoom', roomId, 0); //TODO: give player number here for position
+        client.to(lobbyserver.getSocketId(challenge.challenger)).emit('joinRoom', roomId, 1);
     });
 
     client.on('joinRoom', function (roomId) {
@@ -84,7 +80,6 @@ io.on('connection', function (client) {
         client.join(roomId);
 
         if (room.nrOfPlayers == room.playersExpected) {
-            //TODO: add countdown
             var gData = room.gameserver.getData(true);
             gData.ship.id = client.playerId;
             io.to(roomId).emit('initGame', gData);
@@ -113,7 +108,6 @@ io.on('connection', function (client) {
         });
     });
 
-//TODO:
     client.on('shoot', function (proj) {
         var game = lobbyserver.rooms[proj.roomId].gameserver;
 		var projectile = new Projectile('proj' + game.projs_created, proj.ownerId, proj.pos, proj.angle, tools, 1);
@@ -127,7 +121,7 @@ io.on('connection', function (client) {
     client.on('clientSync', function (data) {
         if (!lobbyserver.rooms[data.roomId]) return;
         var game = lobbyserver.rooms[data.roomId].gameserver;
-        //Update projectiles FIXME: this is what Tanks github did, but seems like a horrible system? balls will go faster per client right?
+
         game.updateProjectiles();
         //Receive data from clients
         game.updateShip(data.ship);

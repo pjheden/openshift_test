@@ -65,7 +65,7 @@ socket.on('initGame', function (data) {
   console.log('initGame', data);
   game.name = lobby.name;
   game.init(data.wind, data.ships, data.roomId);
-  var ship = game.addShip(lobby.name, data.ship.pos, data.ship.isPlayer);
+  var ship = game.addShip(lobby.name, data.ship.pos, data.ship.isPlayer, data.ship.spawnPos);
   socket.emit('addShip', {
     roomId: game.roomId,
     id: ship.id,
@@ -73,7 +73,6 @@ socket.on('initGame', function (data) {
     angle: ship.angle,
     dir: ship.dir,
     collision: ship.collision
-
   });
 });
 
@@ -121,9 +120,10 @@ socket.on('challenge', function (ch) {
   lobby.challenged(ch.challengerId, ch.message);
 });
 
-socket.on('joinRoom', function (roomId) {
+socket.on('joinRoom', function (roomId, spawnPos) {
   document.getElementsByClassName('lobby')[0].style.visibility = 'hidden';
   game.roomId = roomId;
+  game.spawnPos = spawnPos;
   //TODO: Start the game
   socket.emit('joinRoom', roomId);
 });

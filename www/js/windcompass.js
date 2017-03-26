@@ -21,8 +21,6 @@ WindCompass.prototype = {
             this.msCanvas = document.getElementById('windcanvas');
             this.ms = this.msCanvas.getContext('2d');
         }
-        console.log('draw');
-        
         var windAngle = Math.atan(wind[1] / wind[0]);
 
         this.clear(this.ms);

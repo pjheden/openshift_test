@@ -93,13 +93,10 @@ module.exports = function GameServer(roomId) {
 		};
 
 		if (isInitial) {
-			var initX = 700;
-			var initY = 450;
-
 			t.ship = {
 				pos: {
-					x: initX,
-					y: initY
+					x: 200,
+					y: 200
 				},
 				angle: 0.0,
 				dir: {

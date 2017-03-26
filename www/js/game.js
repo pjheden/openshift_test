@@ -11,6 +11,9 @@ function Game(socket, ctx, w, h) {
     WIDTH = w;
     HEIGHT = h;
 
+    this.spawns = [{x: w/10, y: h / 2}, {x: w-w/10, y: h/2}];
+    this.angles = [0.0, Math.PI];
+
     this.ships = [];
     this.projectiles = [];
     // this.feeds = [];
@@ -73,15 +76,21 @@ Game.prototype = {
         this.netgraph.update(this.fps, this.serverups);
     },
 
-    addShip: function (id, pos, isPlayer) {
-        var t = new Ship(id, this.ctx, pos);
-        this.ships.push(t);
+    addShip: function (id, pos, isPlayer = false) {
+        var t;
+        
         if (isPlayer) {
+            t = new Ship(id, this.ctx,this.spawns[this.spawnPos], this.angles[this.spawnPos]);
             this.playerShip = t;
             this.playerShip.roomId = this.roomId;
             this.playerShip.setControls();
             this.playerShip.setSocket(this.socket);
+            
+        }else{
+            t = new Ship(id, this.ctx, pos, 0.0);
         }
+        this.ships.push(t);
+        
         return t;
     },
 
