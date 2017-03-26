@@ -1,12 +1,12 @@
 ----What to do----
 -Game-
 Set spawn on each side
-Add a reload timer
 Return to lobby on player victory
 
 Set a fix canvas size
 Remove elemens from clientgame.oldFeed once they are deleted
 Remove watersplash after some time
+Add visuals for reload time
 
 -Lobby-
 Move leaderboard to lobby

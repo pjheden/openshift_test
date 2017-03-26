@@ -34,6 +34,9 @@ function Ship(id, ctx, pos) {
 
     this.collision = this.image.height / 2;
 
+    this.lastShot = Date.now();
+    this.reloadTime = 3000;
+
     //this.draw();
 }
 
@@ -137,6 +140,7 @@ Ship.prototype = {
      */
     shoot: function() {
       if (this.dead || !this.socket) return;
+      if(Date.now() - this.lastShot < this.reloadTime) return;
 
       var projectile = {
           ownerId: this.id,
@@ -144,6 +148,7 @@ Ship.prototype = {
           angle: this.angle,
           roomId: this.roomId
       };
+      this.lastShot = Date.now();
       this.socket.emit('shoot', projectile);
     }
 }

@@ -111,12 +111,14 @@ Game.prototype = {
             that.ctx.drawImage(ship.image, ship.image.width / -2, ship.image.height / -2, ship.image.width, ship.image.height);
             that.ctx.restore();
 
-            //Draw circle around ship
-            that.ctx.beginPath();
-            that.ctx.arc(ship.pos.x, ship.pos.y, ship.image.width / 2, 0, 2 * Math.PI); //good visual
-            //that.ctx.arc(ship.pos.x, ship.pos.y, ship.image.height / 2, 0, 2 * Math.PI); //hit detection
-            that.ctx.stroke();
-            that.ctx.closePath();
+            if(ship.id === that.playerShip.id){
+                //Draw circle around ship
+                that.ctx.beginPath();
+                that.ctx.arc(ship.pos.x, ship.pos.y, ship.image.width / 2, 0, 2 * Math.PI); //good visual
+                //that.ctx.arc(ship.pos.x, ship.pos.y, ship.image.height / 2, 0, 2 * Math.PI); //hit detection
+                that.ctx.stroke();
+                that.ctx.closePath();
+            }
         });
 
     },
