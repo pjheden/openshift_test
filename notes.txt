@@ -2,7 +2,6 @@
 -Game-
 Don't exit the game instantly, show winner and wait a few seconds
 Sometimes boats doesnt spawn with the right angle
-Remove watersplash on gameend
 
 Set a fix canvas size
 Remove elemens from clientgame.oldFeed once they are deleted
