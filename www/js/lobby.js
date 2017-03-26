@@ -54,6 +54,7 @@ Lobby.prototype = {
         this.setButton(true, challengerId);
     },
     acceptChallenge: function(playerElement){
+        this.setButton(false, playerElement.id);
         socket.emit('acceptChallenge', {challenger: playerElement.id, challenged: this.player.id, nrOfPlayers:2});
     },
     declineChallenge: function(challengerId){
@@ -80,7 +81,6 @@ Lobby.prototype = {
     addPlayer: function (player, isPlayer) {
         if(!this.inited) return;
         if(isPlayer) this.player = player;
-        console.log('addPlayer');
         this.players.push(player);
         this.drawPlayer(player, isPlayer);
 

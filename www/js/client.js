@@ -22,9 +22,14 @@ socket.on('error', function () {
 });
 
 var canvas = $('#arena');
+canvas[0].style.background = ' url("./images/laguna.png")';
+canvas[0].style.backgroundSize = 'cover';
 var ctx = canvas[0].getContext('2d');
 ctx.canvas.width = window.innerWidth;
 ctx.canvas.height = window.innerHeight;
+
+$('#projectiles').width(window.innerWidth);
+$('#projectiles').height(window.innerHeight);
 
 
 $(document).ready(function () {
@@ -60,7 +65,7 @@ socket.on('initGame', function (data) {
   console.log('initGame', data);
   game.name = lobby.name;
   game.init(data.wind, data.ships, data.roomId);
-  var ship = game.addShip(lobby.name, data.ship.pos, data.ship.isPlayer);
+  var ship = game.addShip(lobby.name, data.ship.pos, data.ship.isPlayer, data.ship.spawnPos);
   socket.emit('addShip', {
     roomId: game.roomId,
     id: ship.id,
@@ -68,7 +73,6 @@ socket.on('initGame', function (data) {
     angle: ship.angle,
     dir: ship.dir,
     collision: ship.collision
-
   });
 });
 
@@ -116,9 +120,19 @@ socket.on('challenge', function (ch) {
   lobby.challenged(ch.challengerId, ch.message);
 });
 
-socket.on('joinRoom', function (roomId) {
+socket.on('joinRoom', function (roomId, spawnPos, team) {
   document.getElementsByClassName('lobby')[0].style.visibility = 'hidden';
   game.roomId = roomId;
-  //TODO: Start the game
+  game.spawnPos = spawnPos;
+  game.team = team;
+
   socket.emit('joinRoom', roomId);
+});
+
+socket.on('leaveRoom', function (winner, roomId) {
+  document.getElementsByClassName('lobby')[0].style.visibility = 'visible';
+  console.log('leaveroom, winner is', 'team' + winner);
+  game.reset();
+  
+  socket.emit('leaveRoom', roomId);
 });

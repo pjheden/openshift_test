@@ -9,7 +9,11 @@ module.exports = function GameServer(roomId) {
 	that.ships = [];
 	that.projectiles = [];
 	that.killfeed = [];
+	that.projfeed = [];
 	that.wind = [1, 1];
+
+	that.teamsize = 1;
+	that.teams = [0, 0];
 
 	/*that.scoreboard = new Scoreboard();*/
 
@@ -35,6 +39,7 @@ module.exports = function GameServer(roomId) {
 				this.ships[i].angle = ship.angle;
 				this.ships[i].dir = ship.dir;
 				this.ships[i].collision = ship.collision;
+				this.ships[i].team = ship.team;
 			}
 		}
 	};
@@ -47,9 +52,14 @@ module.exports = function GameServer(roomId) {
 		});
 	};
 	this.updateProjectiles = function () {
+		if (!this.lastCalledTime) {
+			this.lastCalledTime = Date.now();
+		}
+		var deltaTime = (Date.now() - this.lastCalledTime) / 1000;
+		this.lastCalledTime = Date.now();
 		var that = this;
 		this.projectiles.forEach(function (proj) {
-			proj.move(that.wind);
+			proj.move(that.wind, deltaTime);
 		});
 	};
 	//FIXME: The hitbox seems to be quite off.
@@ -66,32 +76,46 @@ module.exports = function GameServer(roomId) {
 						ship.dead = true;
 						proj.dead = true;
 						that.killfeed.push({
+							feedId: 'feed' + that.projs_created,
 							playerId: proj.ownerId,
 							targetId: ship.id
 						});
+						if (ship.team == 'team0') {
+							that.teams[0] += 1;
+						} else {
+							that.teams[1] += 1;
+						}
 					}
 				});
 			}
 		});
 	};
+
+	this.checkWinner = function () {
+		for(var i = 0; i < this.teams.length; i ++){
+			if(this.teams[i] >= this.teamsize){
+				return i;
+			}
+		}
+		return -1;
+	};
+
 	this.getData = function (isInitial) {
 
 		var t = {
 			ships: this.ships,
 			projectiles: this.projectiles,
 			killfeed: this.killfeed,
+			projfeed: this.projfeed,
 			wind: this.wind,
 			roomId: this.roomId
 		};
 
 		if (isInitial) {
-			var initX = 700;
-			var initY = 450;
-
 			t.ship = {
 				pos: {
-					x: initX,
-					y: initY
+					x: 200,
+					y: 200
 				},
 				angle: 0.0,
 				dir: {

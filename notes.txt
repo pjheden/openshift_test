@@ -1,15 +1,26 @@
 ----What to do----
+-Game-
+Don't exit the game instantly, show winner and wait a few seconds
+Sometimes boats doesnt spawn with the right angle
 
-Add visual borders, laguna?
+Set a fix canvas size
+Remove elemens from clientgame.oldFeed once they are deleted
+Remove watersplash after some time
+Add visuals for reload time
+Change to best of 3
+
+Instead of disabling and enabling buttons i should have different classes in css i swap between
+
+-Lobby-
+Move leaderboard to lobby
+Change lobby to drawing in deekit
 
 Functional leaderboard
     -Serverside in ram? So is it who's the best right now, or is it history based?
-Check if killfeed has a bug still
-    -Only shows on some screens
+    
 Add rocks
     -Blocks projectiles
     -Kills ship on contact
     -Breakable by shooting or so?
-Splash animation for projectile
 Ship death animation
 Go through all FIXME: and TODO:

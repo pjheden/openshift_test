@@ -5,8 +5,8 @@
  * @param {integer} x - The x coordinate of the ship
  * @param {integer} y - The y coordinate of the ship
  */
-function Ship(id, ctx, pos) {
-  console.log('Ship constructor');
+function Ship(id, ctx, pos, angle=0.0) {
+    console.log('Ship constructor', id);
     this.id = id;
     this.dead = false;
     this.ctx = ctx;
@@ -29,10 +29,13 @@ function Ship(id, ctx, pos) {
         y: 0
     };
     this.rotateDir = 0;
-    this.angle = 0.0;
+    this.angle = angle;
     this.deltaA = Math.PI;
 
     this.collision = this.image.height / 2;
+
+    this.lastShot = Date.now();
+    this.reloadTime = 3000;
 
     //this.draw();
 }
@@ -137,12 +140,15 @@ Ship.prototype = {
      */
     shoot: function() {
       if (this.dead || !this.socket) return;
-
+      if(Date.now() - this.lastShot < this.reloadTime) return;
+      
       var projectile = {
           ownerId: this.id,
           pos: this.pos,
-          angle: this.angle
+          angle: this.angle,
+          roomId: this.roomId
       };
+      this.lastShot = Date.now();
       this.socket.emit('shoot', projectile);
     }
 }

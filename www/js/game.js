@@ -6,14 +6,18 @@ function Game(socket, ctx, w, h) {
     console.log('Game constructor');
     this.socket = socket;
     this.ctx = ctx;
-    this.roomId;
 
     WIDTH = w;
     HEIGHT = h;
 
+    this.spawns = [{x: w/10, y: h / 2}, {x: w-w/10, y: h/2}];
+    this.angles = [0.0, Math.PI];
+
+    this.roomId;
     this.ships = [];
     this.projectiles = [];
-    this.feeds = [];
+    // this.feeds = [];
+    this.oldFeeds = [];
     this.playerShip;
 
     this.wind = [1, 1];
@@ -23,6 +27,7 @@ function Game(socket, ctx, w, h) {
     this.fps;
     this.lastCalledTime;
     this.netgraph = new Netgraph();
+    this.windcompass = new WindCompass();
 
 }
 
@@ -44,9 +49,50 @@ Game.prototype = {
         }
 
         var g = this;
-        setInterval(function () {
-            g.mainLoop();
+        var timer = new Timer();
+        this.mainInterval = setInterval(function () {
+            if(timer.finished){
+                g.mainLoop();
+            }
         }, INTERVAL);
+    },
+
+    reset: function() {
+        clearInterval(this.mainInterval);
+
+        delete this.fps;
+        delete this.lastCalledTime;
+        delete this.lastCalledTime_server;
+        delete this.mainInterval;
+        delete this.name;
+        delete this.playerShip;
+        delete this.serverups;
+        delete this.spawnPos;
+        delete this.team;
+        $(document).off("keypress");
+
+        //Remove all watersplashes
+        var node = document.getElementsByClassName('projectiles')[0];
+        while (node.hasChildNodes()) {
+            node.removeChild(node.lastChild);
+        }
+
+        this.roomId;
+        this.ships = [];
+        this.projectiles = [];
+        // this.feeds = [];
+        this.oldFeeds = [];
+        this.playerShip;
+
+        this.wind = [1, 1];
+
+        this.serverups;
+        this.lastCalledTime_server;
+        this.fps;
+        this.lastCalledTime;
+
+
+        this.clearMap();
     },
 
     mainLoop: function () {
@@ -54,7 +100,7 @@ Game.prototype = {
         
         var delta = (Date.now() - this.lastCalledTime) / 1000;
         this.updateAllObjects(delta);
-        if (this.playerShip) { //TODO: Make ship movement undependent on fps, right now the hsip jumps forward sometimes because fps changes with correlates to speed of ship
+        if (this.playerShip) {
             this.playerShip.rotate(delta);
             this.playerShip.move(this.wind, delta);
             this.sendData();
@@ -62,19 +108,27 @@ Game.prototype = {
         this.clearMap();
         this.drawShips();
         this.drawProjectiles();
+        this.windcompass.draw(this.wind); //draw the new wind
 
         this.fps = this.requestAnimFrame(this.lastCalledTime);
         this.netgraph.update(this.fps, this.serverups);
     },
 
-    addShip: function (id, pos, isPlayer) {
-        var t = new Ship(id, this.ctx, pos);
-        this.ships.push(t);
+    addShip: function (id, pos, isPlayer = false) {
+        var t;
+        
         if (isPlayer) {
+            t = new Ship(id, this.ctx,this.spawns[this.spawnPos], this.angles[this.spawnPos]);
             this.playerShip = t;
-            t.setControls();
-            t.setSocket(this.socket);
+            this.playerShip.roomId = this.roomId;
+            this.playerShip.setControls();
+            this.playerShip.setSocket(this.socket);
+            
+        }else{
+            t = new Ship(id, this.ctx, pos, 0.0);
         }
+        this.ships.push(t);
+        
         return t;
     },
 
@@ -96,15 +150,6 @@ Game.prototype = {
         var that = this;
         this.ships.forEach(function (ship) {
 
-            //Draw wind arrow udnder ship
-            //that.ctx.rotate( Math.atan( that.wind[1]/ that.wind[0] ) );
-            var windAngle = Math.atan(that.wind[1] / that.wind[0]);
-            that.ctx.beginPath();
-            that.ctx.moveTo(ship.pos.x, ship.pos.y);
-            that.ctx.lineTo(ship.pos.x + (ship.image.width / 2) * Math.sin(windAngle), ship.pos.y + (ship.image.width / 2) * Math.cos(windAngle));
-            that.ctx.stroke();
-            that.ctx.closePath();
-
             //Draw ship
             that.ctx.save();
             that.ctx.translate(ship.pos.x, ship.pos.y);
@@ -113,12 +158,14 @@ Game.prototype = {
             that.ctx.drawImage(ship.image, ship.image.width / -2, ship.image.height / -2, ship.image.width, ship.image.height);
             that.ctx.restore();
 
-            //Draw circle around ship
-            that.ctx.beginPath();
-            that.ctx.arc(ship.pos.x, ship.pos.y, ship.image.width / 2, 0, 2 * Math.PI); //good visual
-            //that.ctx.arc(ship.pos.x, ship.pos.y, ship.image.height / 2, 0, 2 * Math.PI); //hit detection
-            that.ctx.stroke();
-            that.ctx.closePath();
+            if(ship.id === that.playerShip.id){
+                //Draw circle around ship
+                that.ctx.beginPath();
+                that.ctx.arc(ship.pos.x, ship.pos.y, ship.image.width / 2, 0, 2 * Math.PI); //good visual
+                //that.ctx.arc(ship.pos.x, ship.pos.y, ship.image.height / 2, 0, 2 * Math.PI); //hit detection
+                that.ctx.stroke();
+                that.ctx.closePath();
+            }
         });
 
     },
@@ -134,27 +181,28 @@ Game.prototype = {
             that.ctx.stroke();
         });
     },
-    drawFeeds: function () {
-        this.feeds.forEach(function (feed) {
-            var kf = new Killfeed(feed.playerId, feed.targetId);
-            kf.draw();
-        });
-        this.feeds = [];
-    },
+    // drawFeeds: function () {
+    //     this.feeds.forEach(function (feed) {
+    //         var kf = new Killfeed(feed.playerId, feed.targetId);
+    //         kf.draw();
+    //     });
+    //     this.feeds = [];
+    // },
     updateAllObjects: function (deltaTime) {
+        
         //Wind calculations
         var windDirection = normalize(this.wind[0], this.wind[1]);
         var windMagnitude = lengthVec(this.wind[0], this.wind[1]);
 
         this.updateShips(windDirection, windMagnitude, deltaTime);
-        this.updateProjectiles(windDirection, windMagnitude);
+        this.updateProjectiles(windDirection, windMagnitude, deltaTime);
     },
     /**
      * Update the movement of the projectiles locally to reduce lag
      * @param {Vector} windDirection - direction of the wind 2D
      * @param {Double} windMagnitude - Magnitude of the wind
      */
-    updateProjectiles: function (windDirection, windMagnitude) {
+    updateProjectiles: function (windDirection, windMagnitude, deltaTime) {
         var that = this;
         this.projectiles.forEach(function (proj) {
             //Update projectile position
@@ -164,8 +212,8 @@ Game.prototype = {
             };
             proj.speed.x += wSpeed.x;
             proj.speed.y += wSpeed.y;
-            proj.pos.x += proj.speed.x;
-            proj.pos.y += proj.speed.y;
+            proj.pos.x += proj.speed.x * deltaTime;
+            proj.pos.y += proj.speed.y * deltaTime;
         });
 
     },
@@ -173,6 +221,7 @@ Game.prototype = {
      * Make a guess of the ships moevments and update them locally
      */
     updateShips: function (windDirection, windMagnitude, deltaTime) {
+        
         var that = this;
         this.ships.forEach(function (ship) {
             if (!that.playerShip || ship.id !== that.playerShip.id) {
@@ -226,6 +275,7 @@ Game.prototype = {
             angle: this.playerShip.angle,
             dir: this.playerShip.dir,
             collision: this.playerShip.collision,
+            team: this.team
         };
         gameData.ship = t;
         gameData.roomId = this.roomId;
@@ -244,7 +294,6 @@ Game.prototype = {
         game.serverups = game.serverResponseTime(game.lastCalledTime_server);
 
         game.wind = serverData.wind;
-
 
         //Update ship information
         serverData.ships.forEach(function (serverShip) {
@@ -267,9 +316,19 @@ Game.prototype = {
 
         game.projectiles = serverData.projectiles;
 
+        serverData.projfeed.forEach( function( feed ){
+            if(!inArray(feed.id, game.oldFeeds)){
+                game.oldFeeds.push(feed.id);
+                document.getElementsByClassName('projectiles')[0].innerHTML += feed.elem;
+            }
+        });
+
         serverData.killfeed.forEach(function (feed) {
-            var kf = new Killfeed(feed.playerId, feed.targetId);
-            kf.draw();
+            if(!inArray(feed.feedId, game.oldFeeds)){
+                game.oldFeeds.push(feed.feedId);
+                var kf = new Killfeed(feed.feedId, feed.playerId, feed.targetId);
+                kf.draw();
+            }
         });
     }
 }
@@ -302,47 +361,5 @@ function Scoreboard() {
 }
 
 Scoreboard.prototype = {
-
-};
-
-//FIXME: Seems like only some players gets a feed
-function Killfeed(playerId, targetId) {
-    this.playerId = playerId;
-    this.targetId = targetId;
-    this.elemId = playerId + targetId;
-    this.elem;
-
-    this.intv;
-    this.intvT = 1000;
-}
-
-Killfeed.prototype = {
-    draw: function () {
-        var str = '<div style="opacity:0.8;" id = ' + this.elemId + '>';
-        str += '<span style="color:#80ff80;">' + this.playerId + '</span>';
-        str += '<span class="circle"></span>';
-        str += '<span style="color:#80d0d0;"> ' + this.targetId + '</span>';
-        str += '<br></div>';
-        document.getElementsByClassName('killfeed')[0].innerHTML += str;
-
-        this.intv = setInterval(this.animation, this.intvT);
-    },
-    remove: function () {
-        this.elem.parentNode.removeChild(this.elem);
-    },
-    //FIXME: Animation not working
-    animation: function () {
-        if (!this.elem) {
-            this.elem = document.getElementById(this.elemId);
-            return;
-        }
-
-        if (parseInt(this.elem.style.opacity) <= 0) {
-            this.remove();
-            clearInterval(this.intv);
-        } else {
-            this.elem.style.opacity = parseInt(this.elem.style.opacity) - 0.01;
-        }
-    }
 
 };

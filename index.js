@@ -3,7 +3,7 @@ var app = express();
 
 var Gameserver = require('./js/gameserver.js');
 var lobbyserver = require('./js/lobbyserver.js');
-// var projectile = require('./js/projectile.js');
+var Projectile = require('./js/projectile.js');
 // var scoreboard = require('./js/scoreboard.js');
 var tools = require('./js/tools.js');
 
@@ -63,10 +63,6 @@ io.on('connection', function (client) {
     });
 
     client.on('acceptChallenge', function (challenge) {
-        // Then in joinRoom, we can check if players == playersExpected
-        // Then start a countdown to begin the game
-        // Need a gameserver per room?
-
         var roomId = tools.makeId(6);
         lobbyserver.rooms[roomId] = {
             playersExpected: challenge.nrOfPlayers,
@@ -74,21 +70,34 @@ io.on('connection', function (client) {
             gameserver: new Gameserver(roomId)
         };
 
-        client.emit('joinRoom', roomId);
-        client.to(lobbyserver.getSocketId(challenge.challenger)).emit('joinRoom', roomId);
+        
+
+        client.emit('joinRoom', roomId, 0, 'team0'); //TODO: give player number here for position
+        client.to(lobbyserver.getSocketId(challenge.challenger)).emit('joinRoom', roomId, 1, 'team1');
     });
 
     client.on('joinRoom', function (roomId) {
         var room = lobbyserver.rooms[roomId];
         room.nrOfPlayers += 1;
         client.join(roomId);
+        console.log('client joined', roomId);
+        
 
         if (room.nrOfPlayers == room.playersExpected) {
-            //TODO: add countdown
             var gData = room.gameserver.getData(true);
             gData.ship.id = client.playerId;
             io.to(roomId).emit('initGame', gData);
 
+        }
+    });
+
+    client.on('leaveRoom', function (roomId) {
+        client.leave(roomId);
+        var room = lobbyserver.rooms[roomId];
+        room.nrOfPlayers -= 1;
+
+        if (room.nrOfPlayers == 0) {
+            delete lobbyserver.rooms[roomId];
         }
     });
 
@@ -113,14 +122,26 @@ io.on('connection', function (client) {
         });
     });
 
+    client.on('shoot', function (proj) {
+        
+        var game = lobbyserver.rooms[proj.roomId].gameserver;
+		var projectile = new Projectile('proj' + game.projs_created, proj.ownerId, proj.pos, proj.angle, tools, 1);
+		game.addProjectile(projectile);
+		game.projs_created++;
+        var projectile = new Projectile('proj' + game.projs_created, proj.ownerId, proj.pos, proj.angle, tools, -1);
+		game.addProjectile(projectile);
+		game.projs_created++;
+	});
+
     client.on('clientSync', function (data) {
-        //TODO: Ships aren't added to the game, look at index_old.js
-
-
         if (!lobbyserver.rooms[data.roomId]) return;
         var game = lobbyserver.rooms[data.roomId].gameserver;
-        //Update projectiles FIXME: this is what Tanks github did, but seems like a horrible system? balls will go faster per client right?
+
         game.updateProjectiles();
+        var winner = game.checkWinner();
+        if(winner != -1){
+            client.emit('leaveRoom', winner, data.roomId);
+        }
         //Receive data from clients
         game.updateShip(data.ship);
 
@@ -128,20 +149,21 @@ io.on('connection', function (client) {
 
         game.detectCollision();
 
-
         //Broadcast data to clients
-        client.to(data.roomId).emit('serverSync', game.getData());
-        // client.broadcast.emit('serverSync', game.getData());
+        client.in(data.roomId).emit('serverSync', game.getData());
 
         //Remove all dead ships and projectiles
-        game.ships.forEach(function (ship) {
-            if (ship.dead) game.removeShip(ship.id);
-        });
+        // game.ships.forEach(function (ship) {
+        //     if (ship.dead) game.removeShip(ship.id);
+        // });
         game.projectiles.forEach(function (proj) {
-            if (proj.dead) game.removeProjectile(proj.id);
+            if (proj.dead){
+                game.projfeed.push(proj.animateDeath());
+                game.removeProjectile(proj.id);
+            }
         });
 
-        //this.clearFeed();
+        //game.clearFeed(); //I solved this in Killfeed class instead, by only drawing undrawn feeds
     });
 
 });

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+</head>
+
+<body>
+
+    <div id="wind"></div>
+
+    <script type="text/javascript" src="./script.js"></script>
+    <script>
+        var wind = new Wind();
+        setInterval(function(){
+            var windDir = [Math.floor(Math.random() * (3 - -3)) + -3, Math.floor(Math.random() * (3 - -3)) + -3];
+            wind.draw(windDir);
+        }, 50);
+        
+    </script>
+
+</body>
+
+</html>

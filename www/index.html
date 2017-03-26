@@ -8,8 +8,6 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 
 	<link rel="stylesheet" href="css/style.css">
-	<!-- <link rel="stylesheet" href="css/bootstrap.min.css">
-	<link rel="stylesheet" href="css/tanks.css"> -->
 	<script type="text/javascript" src="js/jquery.min.js"></script>
 	<script type="text/javascript" src="js/socket.io.js"></script>
 </head>
@@ -33,13 +31,14 @@
 	<br></div>
 
 	<div class="killfeed"></div>
+	<div class="projectiles"></div>
+	<time id = "timer"></time>
+	<div class="windcompass" id="windcompass"></div>
 
 	<div class="netgraph">
-		<p id = "fps">FPS: 0</p>
-		<br><p id = "time">Server response time: 0 s</p>
+		<p id = "fps"></p>
+		<br><p id = "time"></p>
 	</div>
-
-	<div class="arrow"></div>
 
 	<div class="join_section">
 		<input id="player_name" type="text" placeholder="Name:">
@@ -53,6 +52,9 @@
 
 
 	<script type="text/javascript" src="js/tools.js"></script>
+	<script type="text/javascript" src="js/killfeed.js"></script>
+	<script type="text/javascript" src="js/timer.js"></script>
+	<script type="text/javascript" src="js/windcompass.js"></script>
 	<script type="text/javascript" src="js/ship.js"></script>
 	<script type="text/javascript" src="js/lobby.js"></script>
 	<script type="text/javascript" src="js/game.js"></script>
