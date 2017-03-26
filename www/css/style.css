@@ -46,6 +46,12 @@ time {
   right: 50%;
 }
 
+.windcompass {
+  position: fixed;
+  top: 0%;
+  right: 50%;
+}
+
 .circle:before {
   content: ' \25CF';
   font-size: 14px;

@@ -5,12 +5,17 @@
 </head>
 
 <body>
-    <time id = "timer">
-    </time>
 
-    <script type="text/javascript" src="./timer.js"></script>
+    <div id="wind"></div>
+
+    <script type="text/javascript" src="./script.js"></script>
     <script>
-        var timer = new Timer();
+        var wind = new Wind();
+        setInterval(function(){
+            var windDir = [Math.floor(Math.random() * (3 - -3)) + -3, Math.floor(Math.random() * (3 - -3)) + -3];
+            wind.draw(windDir);
+        }, 50);
+        
     </script>
 
 </body>

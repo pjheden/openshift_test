@@ -1,9 +1,5 @@
 ----What to do----
 -Game-
-Add wind on top
-    -Remove ring and wind direction under boat
-    -Should be a div to reduce redrawing, called every time wind change
-        [] or its own canvas
 Set spawn on each side
 Add a reload timer
 Return to lobby on player victory

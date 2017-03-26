@@ -24,6 +24,7 @@ function Game(socket, ctx, w, h) {
     this.fps;
     this.lastCalledTime;
     this.netgraph = new Netgraph();
+    this.windcompass = new WindCompass()
 
 }
 
@@ -66,6 +67,7 @@ Game.prototype = {
         this.clearMap();
         this.drawShips();
         this.drawProjectiles();
+        this.windcompass.draw(this.wind); //draw the new wind
 
         this.fps = this.requestAnimFrame(this.lastCalledTime);
         this.netgraph.update(this.fps, this.serverups);
@@ -100,15 +102,6 @@ Game.prototype = {
     drawShips: function () {
         var that = this;
         this.ships.forEach(function (ship) {
-
-            //Draw wind arrow udnder ship
-            //that.ctx.rotate( Math.atan( that.wind[1]/ that.wind[0] ) );
-            var windAngle = Math.atan(that.wind[1] / that.wind[0]);
-            that.ctx.beginPath();
-            that.ctx.moveTo(ship.pos.x, ship.pos.y);
-            that.ctx.lineTo(ship.pos.x + (ship.image.width / 2) * Math.sin(windAngle), ship.pos.y + (ship.image.width / 2) * Math.cos(windAngle));
-            that.ctx.stroke();
-            that.ctx.closePath();
 
             //Draw ship
             that.ctx.save();
@@ -249,7 +242,6 @@ Game.prototype = {
         game.serverups = game.serverResponseTime(game.lastCalledTime_server);
 
         game.wind = serverData.wind;
-
 
         //Update ship information
         serverData.ships.forEach(function (serverShip) {
