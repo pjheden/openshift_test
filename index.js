@@ -11,13 +11,12 @@ lobbyserver.init();
 
 //Static resources server
 app.use(express.static(__dirname + '/www'));
+app.set('port', process.env.OPENSHIFT_NODEJS_PORT || 3000);  
+app.set('ipaddr', process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1");  
 
-var server = app.listen(process.env.PORT || 8082, function () {
-    var port = server.address().port;
-    console.log('Server running at port %s', port);
-});
+var server = require('http').createServer(app)
 
-var io = require('socket.io')(server);
+var io = require('socket.io').listen(server);
 
 io.on('connection', function (client) {
     console.log('User connected:', client.client.conn.id);
