@@ -302,7 +302,7 @@ Game.prototype = {
             } else {
                 var shipFound = false;
                 game.ships.forEach(function (clientShip) {
-                    if (serverShip.id === clientShip.id && clientShip.id !== playerShip.id) {
+                    if (serverShip.id === clientShip.id && clientShip.id !== game.playerShip.id) {
                         clientShip.pos = serverShip.pos;
                         clientShip.angle = serverShip.angle;
                         clientShip.dir = serverShip.dir;
