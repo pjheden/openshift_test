@@ -96,8 +96,6 @@ Game.prototype = {
     },
 
     mainLoop: function () {
-        console.log('mainloop');
-        
         var delta = (Date.now() - this.lastCalledTime) / 1000;
         this.updateAllObjects(delta);
         if (this.playerShip) {
@@ -310,7 +308,7 @@ Game.prototype = {
                         shipFound = true;
                     }
                 });
-                if (!shipFound) game.addShip(serverShip.id, serverShip.pos, false);
+                if (!shipFound && serverShip.id !== game.playerShip.id) game.addShip(serverShip.id, serverShip.pos, false);
             }
         });
 
