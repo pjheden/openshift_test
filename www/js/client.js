@@ -67,7 +67,8 @@ socket.on('initGame', function (data) {
   console.log('initGame', data);
   game.name = lobby.name;
   game.init(data.wind, data.ships, data.roomId);
-  var ship = game.addShip(lobby.name, data.ship.pos, data.ship.isPlayer, data.ship.spawnPos);
+  var ship = game.addShip(lobby.name, data.ship.pos, data.ship.isPlayer);
+  
   socket.emit('addShip', {
     roomId: game.roomId,
     id: ship.id,

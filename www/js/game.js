@@ -297,10 +297,16 @@ Game.prototype = {
         serverData.ships.forEach(function (serverShip) {
             if (serverShip.dead) {
                 game.removeShip(serverShip.id);
-            } else {
+            }else if(game.playerShip && serverShip.id == game.playerShip.id){
+                game.playerShip.dead = serverShip.dead;
+                if(isNaN(game.playerShip.angle))
+                    game.playerShip.angle = serverShip.angle;
+                
+            }
+            else {
                 var shipFound = false;
                 game.ships.forEach(function (clientShip) {
-                    if (serverShip.id === clientShip.id && clientShip.id !== game.playerShip.id) {
+                    if (serverShip.id === clientShip.id) {
                         clientShip.pos = serverShip.pos;
                         clientShip.angle = serverShip.angle;
                         clientShip.dir = serverShip.dir;
@@ -308,7 +314,7 @@ Game.prototype = {
                         shipFound = true;
                     }
                 });
-                if (!shipFound && serverShip.id !== game.playerShip.id) game.addShip(serverShip.id, serverShip.pos, false);
+                if (!shipFound) game.addShip(serverShip.id, serverShip.pos, false);
             }
         });
 

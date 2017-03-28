@@ -5,11 +5,28 @@
  * @param {integer} x - The x coordinate of the ship
  * @param {integer} y - The y coordinate of the ship
  */
-function Ship(id, ctx, pos, angle=0.0) {
+function Ship(id, ctx, pos, angle= 0) {
     console.log('Ship constructor', id);
     this.id = id;
     this.dead = false;
     this.ctx = ctx;
+    
+    this.speed = 100;
+
+    this.pos = pos;
+    this.dir = {};
+    this.dir.x = 0;
+    this.dir.y = 0;
+    
+    this.rotateDir = 0;
+    this.angle = angle;
+    this.deltaA = Math.PI;
+
+
+    this.lastShot = Date.now();
+    this.reloadTime = 3000;
+
+    //this.draw();
     var src = './images/ships/ship_pattern0.png';
     this.image = new Image();
     this.image.src = src;
@@ -17,27 +34,9 @@ function Ship(id, ctx, pos, angle=0.0) {
     // this.image.height = this.image.height / 10;
     this.image.width = 64;
     this.image.height = 40;
-    this.speed = 100;
-
-    // this.pos.x = x;
-    // this.pos.y = y;
-    // this.dir = 0;
-
-    this.pos = pos;
-    this.dir = {
-        x: 0,
-        y: 0
-    };
-    this.rotateDir = 0;
-    this.angle = angle;
-    this.deltaA = Math.PI;
 
     this.collision = this.image.height / 2;
 
-    this.lastShot = Date.now();
-    this.reloadTime = 3000;
-
-    //this.draw();
 }
 
 Ship.prototype = {
@@ -113,7 +112,7 @@ Ship.prototype = {
     },
 
     move: function(wind, deltaTime) {
-        if (this.dead) return;
+        if (this.dead || isNaN(deltaTime)) return;
         //Wind calculations
         var windDirection = normalize(wind[0], wind[1]);
         var windMagnitude = lengthVec(wind[0], wind[1]);
@@ -128,6 +127,7 @@ Ship.prototype = {
         //boundary control
         if (newX > (0 + this.image.width / 2) && (newX) < (WIDTH - this.image.width / 2)) {
             this.pos.x = newX;
+            
         }
         if (newY > (0 + this.image.height / 2) && (newY) < (HEIGHT - this.image.height / 2)) {
             this.pos.y = newY;
