@@ -1,6 +1,7 @@
 //var socket = io.connect('https://last-ship-standing-mp.herokuapp.com/');
 //var socket = io.connect('http://localhost:8082');
-var socket = io.connect("http://nodejs-mp-last-ship-standing.44fs.preview.openshiftapps.com/");
+//var socket = io.connect("http://nodejs-mp-last-ship-standing.44fs.preview.openshiftapps.com/");
+var socket = io();
 
 // -------------- General -----------------
 

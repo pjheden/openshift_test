@@ -1,5 +1,15 @@
 var express = require('express');
 var app = express();
+var server = require('http').Server(app)
+var io = require('socket.io')(server);
+
+//Static resources server
+app.use(express.static('./www'));
+server.listen(8080);
+// app.set('port', process.env.OPENSHIFT_NODEJS_PORT || 3000);  
+// app.set('ipaddr', process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1");  
+
+
 
 var Gameserver = require('./js/gameserver.js');
 var lobbyserver = require('./js/lobbyserver.js');
@@ -9,14 +19,7 @@ var tools = require('./js/tools.js');
 
 lobbyserver.init();
 
-//Static resources server
-app.use(express.static(__dirname + '/www'));
-app.set('port', process.env.OPENSHIFT_NODEJS_PORT || 3000);  
-app.set('ipaddr', process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1");  
 
-var server = require('http').createServer(app)
-
-var io = require('socket.io').listen(server);
 
 io.on('connection', function (client) {
     console.log('User connected:', client.client.conn.id);
